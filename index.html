@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Clínica Estética – Sistema de Gestão Profissional</title>
+  <meta name="description" content="Sistema completo de gestão para clínicas estéticas. Agenda online, prontuário digital, financeiro e muito mais."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" stroke="#8B47FF" stroke-width="2"/><path d="M10 16 Q16 8 22 16 Q16 24 10 16Z" fill="#8B47FF"/></svg>
+        <span class="logo-text">clínica<strong>experts</strong></span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#funcionalidades">Funcionalidades</a></li>
+        <li><a href="#planos">Planos</a></li>
+        <li><a href="#depoimentos">Depoimentos</a></li>
+        <li><a href="#contato">Contato</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="#planos" class="btn btn-outline">Entrar</a>
+        <a href="#planos" class="btn btn-primary">Começar grátis</a>
+      </div>
+      <button class="nav-hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-badge"><span class="star">★</span> 4.95/5 – Amado por + de 20 mil usuários</div>
+      <h1 class="hero-title">
+        Você viu só parte do verdadeiro potencial.
+        <span class="hero-highlight">Assine e vá além!</span>
+      </h1>
+      <p class="hero-desc">Investindo na plataforma, você libera todo o potencial para simplificar sua rotina, garantir segurança dos seus dados e impulsionar o crescimento da sua clínica.</p>
+      <div class="hero-actions">
+        <a href="#planos" class="btn btn-primary btn-lg">Ver planos →</a>
+        <a href="#funcionalidades" class="btn btn-ghost btn-lg">Conhecer funcionalidades</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><strong>20k+</strong><span>Clínicas ativas</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><strong>4.95★</strong><span>Avaliação média</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><strong>99.9%</strong><span>Uptime garantido</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="funcionalidades">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Funcionalidades</span>
+        <h2>Tudo que sua clínica precisa,<br/><span class="highlight">em um só lugar</span></h2>
+        <p>Uma plataforma completa pensada para profissionais de estética que querem crescer com organização e eficiência.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card"><div class="feature-icon">📅</div><h3>Agenda Inteligente</h3><p>Confirmações automáticas via WhatsApp e lembretes para seus clientes.</p></div>
+        <div class="feature-card"><div class="feature-icon">📋</div><h3>Prontuário Digital</h3><p>Histórico completo com fotos, evoluções e assinatura digital.</p></div>
+        <div class="feature-card"><div class="feature-icon">💰</div><h3>Financeiro Completo</h3><p>Controle de caixa, comissões, relatórios e emissão de NF.</p></div>
+        <div class="feature-card"><div class="feature-icon">💬</div><h3>Chat com Clientes</h3><p>Integração oficial à API do WhatsApp (Meta).</p></div>
+        <div class="feature-card"><div class="feature-icon">📊</div><h3>CRM Completo</h3><p>Funil de vendas, follow-up automático e relatórios.</p></div>
+        <div class="feature-card"><div class="feature-icon">🤖</div><h3>Assistente Virtual</h3><p>Secretária com IA que agenda e atende 24h.</p></div>
+        <div class="feature-card"><div class="feature-icon">🌐</div><h3>Agenda Online</h3><p>Link personalizado para clientes marcarem sozinhos.</p></div>
+        <div class="feature-card"><div class="feature-icon">📦</div><h3>Controle de Estoque</h3><p>Gerencie produtos com alertas automáticos de reposição.</p></div>
+        <div class="feature-card"><div class="feature-icon">✍️</div><h3>Assinatura Digital</h3><p>Contratos com validade jurídica assinados online.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing" id="planos">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Planos</span>
+        <h2>Invista no crescimento<br/><span class="highlight">da sua clínica</span></h2>
+        <p>Cancele os planos mensais a qualquer momento.</p>
+      </div>
+      <div class="pricing-toggle">
+        <button class="toggle-btn" id="btn-monthly" onclick="setPricing('monthly')">Mensal</button>
+        <button class="toggle-btn active" id="btn-annual" onclick="setPricing('annual')">Anual <span class="toggle-badge">-25%</span></button>
+      </div>
+      <p class="toggle-hint" id="toggle-hint">Opte pelos planos anuais e pague menos.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="plan-tag">Para começar</div>
+          <div class="plan-header"><h3>Basic</h3><p>Comece com o básico, sem complicação</p></div>
+          <div class="plan-price">
+            <div class="price-label" id="basic-label">12x de</div>
+            <div class="price-value"><span class="price-currency">R$</span><span class="price-amount" id="basic-price">149,90</span></div>
+            <div class="price-period" id="basic-period" style="display:none">/mês</div>
+            <div class="price-annual" id="basic-annual">R$ 1.798/ano · <span class="save-badge">Economize R$ 590</span></div>
+          </div>
+          <div class="addon-row"><label class="addon-check"><input type="checkbox"> Adicionar secretária virtual</label></div>
+          <a href="#contato" class="btn btn-primary btn-full">Assinar agora →</a>
+          <ul class="plan-features">
+            <li>✓ 1 usuário</li><li>✓ Agenda inteligente</li><li>✓ Prontuário Digital</li>
+            <li>✓ Avisos automáticos</li><li>✓ Anna Assistant</li><li>✓ Financeiro Básico</li>
+            <li>✓ 2 GB de armazenamento</li>
+          </ul>
+          <div class="whatsapp-note"><span class="wa-icon">💬</span> Notificações via API oficial da Meta (janelas entre R$ 0,08 e R$ 0,40)</div>
+        </div>
+        <div class="pricing-card">
+          <div class="plan-tag">Custo-benefício</div>
+          <div class="plan-header"><h3>Essencial</h3><p>As ferramentas certas para crescer</p></div>
+          <div class="plan-price">
+            <div class="price-label">12x de</div>
+            <div class="price-value"><span class="price-currency">R$</span><span class="price-amount" id="essential-price">249,00</span></div>
+            <div class="price-period" id="essential-period" style="display:none">/mês</div>
+            <div class="price-annual" id="essential-annual">R$ 2.988/ano · <span class="save-badge">Economize R$ 1.200</span></div>
+          </div>
+          <div class="addon-row"><label class="addon-check"><input type="checkbox"> Adicionar secretária virtual</label></div>
+          <a href="#contato" class="btn btn-primary btn-full">Assinar agora →</a>
+          <ul class="plan-features">
+            <li><strong>✓ Tudo do Basic e mais:</strong></li>
+            <li>✓ Até 3 usuários</li><li>✓ Agenda Online</li><li>✓ Assinatura Digital</li>
+            <li>✓ Financeiro completo</li><li>✓ 5 GB de armazenamento</li>
+          </ul>
+          <div class="whatsapp-note"><span class="wa-icon">💬</span> Notificações via API oficial da Meta (janelas entre R$ 0,08 e R$ 0,40)</div>
+        </div>
+        <div class="pricing-card pricing-featured">
+          <div class="plan-tag">👑 Mais vendido</div>
+          <div class="plan-header"><h3>Avançado</h3><p>Eficiência e automatização de processos</p></div>
+          <div class="plan-price">
+            <div class="price-label">12x de</div>
+            <div class="price-value"><span class="price-currency">R$</span><span class="price-amount" id="advanced-price">399,00</span></div>
+            <div class="price-period" id="advanced-period" style="display:none">/mês</div>
+            <div class="price-annual" id="advanced-annual">R$ 4.788/ano · <span class="save-badge">Economize R$ 1.200</span></div>
+          </div>
+          <div class="addon-row"><label class="addon-check"><input type="checkbox"> Adicionar secretária virtual</label></div>
+          <a href="#contato" class="btn btn-white btn-full">Assinar agora →</a>
+          <ul class="plan-features">
+            <li><strong>✓ Tudo do Essencial e mais:</strong></li>
+            <li>✓ Até 10 usuários</li><li>✓ Vendas</li><li>✓ Estoque</li>
+            <li>✓ Comissões</li><li>✓ 10 GB de armazenamento</li>
+          </ul>
+          <div class="whatsapp-note whatsapp-note-light"><span class="wa-icon">💬</span> Notificações via API oficial da Meta (janelas entre R$ 0,08 e R$ 0,40)</div>
+        </div>
+        <div class="pricing-card pricing-experts">
+          <div class="plan-tag">Recomendado</div>
+          <div class="plan-header"><h3>Experts</h3><p>Escale para o próximo nível da sua clínica</p></div>
+          <div class="plan-price">
+            <div class="price-value"><span class="experts-price">Solicite orçamento</span></div>
+            <div class="price-period">Valores sob medida para grandes operações</div>
+          </div>
+          <div class="addon-row"><div class="addon-included">✓ Secretária virtual inclusa</div></div>
+          <a href="#contato" class="btn btn-outline experts-btn btn-full">Solicitar →</a>
+          <ul class="plan-features">
+            <li><strong>✓ Tudo do Avançado e mais:</strong></li>
+            <li>✓ Usuários ilimitados</li><li>✓ CliniCRM</li><li>✓ Emissão de NF</li>
+            <li>✓ CliniChat Premium</li><li>✓ 25 GB de armazenamento</li>
+          </ul>
+          <div class="whatsapp-note whatsapp-note-dark"><span class="wa-icon">💬</span> Notificações via API oficial da Meta (janelas entre R$ 0,08 e R$ 0,40)</div>
+        </div>
+      </div>
+      <div class="pricing-cta">
+        <div class="pricing-cta-text">
+          <h3>Ainda com dúvidas? Fale com a gente e descubra o melhor plano para você</h3>
+          <p>Nosso time está pronto para te ajudar a escolher o plano ideal e garantir que você aproveite todo o potencial da plataforma sem perder nenhum benefício do trial.</p>
+        </div>
+        <a href="#contato" class="btn btn-primary btn-lg">Falar com um especialista agora</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="testimonials" id="depoimentos">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Depoimentos</span>
+        <h2>O que nossas clínicas<br/><span class="highlight">falam sobre nós</span></h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p>"Transformou completamente a gestão da minha clínica. A agenda online reduziu as faltas em 60% e o prontuário digital facilita demais o atendimento."</p>
+          <div class="testimonial-author"><div class="author-avatar">MF</div><div><strong>Maria Fernanda</strong><span>Clínica MF Estética, SP</span></div></div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p>"Finalmente tenho controle total do financeiro. As comissões, o estoque e os relatórios me poupam horas por semana. Indico para todas as colegas!"</p>
+          <div class="testimonial-author"><div class="author-avatar">CA</div><div><strong>Carla Andrade</strong><span>Studio Beauty CA, RJ</span></div></div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p>"A secretária virtual é incrível! Ela agenda, responde dúvidas e envia lembretes automáticos. Minha equipe ficou mais focada no atendimento."</p>
+          <div class="testimonial-author"><div class="author-avatar">JL</div><div><strong>Juliana Lima</strong><span>Espaço Juliana Lima, BH</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contato">
+    <div class="container">
+      <div class="contact-wrapper">
+        <div class="contact-text">
+          <span class="section-tag">Contato</span>
+          <h2>Pronto para levar sua clínica ao próximo nível?</h2>
+          <p>Preencha o formulário e um de nossos especialistas entrará em contato para apresentar a plataforma e tirar todas as suas dúvidas.</p>
+          <ul class="contact-benefits">
+            <li>✅ Trial gratuito por 14 dias</li>
+            <li>✅ Sem cartão de crédito</li>
+            <li>✅ Suporte completo na implantação</li>
+            <li>✅ Cancele quando quiser</li>
+          </ul>
+        </div>
+        <div class="contact-form-wrapper">
+          <form class="contact-form" id="leadForm">
+            <div class="form-group"><label>Nome completo *</label><input type="text" id="nome" placeholder="Seu nome" required/></div>
+            <div class="form-group"><label>WhatsApp *</label><input type="tel" id="whatsapp" placeholder="(11) 99999-9999" required/></div>
+            <div class="form-group"><label>E-mail *</label><input type="email" id="email" placeholder="seu@email.com" required/></div>
+            <div class="form-group"><label>Nome da clínica</label><input type="text" id="clinica" placeholder="Clínica Estética..."/></div>
+            <div class="form-group">
+              <label>Plano de interesse</label>
+              <select id="plano">
+                <option value="">Selecione um plano</option>
+                <option value="basic">Basic – R$ 149,90/mês</option>
+                <option value="essencial">Essencial – R$ 249,00/mês</option>
+                <option value="avancado">Avançado – R$ 399,00/mês</option>
+                <option value="experts">Experts – Sob consulta</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full btn-lg" id="submitBtn">Quero um especialista →</button>
+            <p class="form-disclaimer">Ao enviar, você concorda com nossa <a href="#">Política de Privacidade</a>.</p>
+            <div id="formSuccess" class="form-success" style="display:none">✅ Recebemos sua solicitação! Entraremos em contato em breve.</div>
+            <div id="formError" class="form-error" style="display:none">❌ Erro ao enviar. Tente novamente ou entre em contato pelo WhatsApp.</div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo" style="color:#fff;margin-bottom:16px">
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" stroke="#8B47FF" stroke-width="2"/><path d="M10 16 Q16 8 22 16 Q16 24 10 16Z" fill="#8B47FF"/></svg>
+            <span class="logo-text">clínica<strong>experts</strong></span>
+          </div>
+          <p>Sistema completo de gestão para clínicas estéticas. Simplifique sua rotina e impulsione seu crescimento.</p>
+        </div>
+        <div class="footer-links"><h4>Produto</h4><ul><li><a href="#funcionalidades">Funcionalidades</a></li><li><a href="#planos">Planos e Preços</a></li><li><a href="#">Novidades</a></li><li><a href="#">Roadmap</a></li></ul></div>
+        <div class="footer-links"><h4>Empresa</h4><ul><li><a href="#">Sobre nós</a></li><li><a href="#">Blog</a></li><li><a href="#">Carreiras</a></li><li><a href="#contato">Contato</a></li></ul></div>
+        <div class="footer-links"><h4>Suporte</h4><ul><li><a href="#">Central de Ajuda</a></li><li><a href="#">Status do Sistema</a></li><li><a href="#">Política de Privacidade</a></li><li><a href="#">Termos de Uso</a></li></ul></div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 Clínica Experts. Todos os direitos reservados.</p>
+        <p>CNPJ: XX.XXX.XXX/0001-XX</p>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/5511999999999?text=Olá! Quero saber mais sobre os planos." class="whatsapp-float" target="_blank" rel="noopener">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+  </a>
+  <script src="app.js"></script>
+</body>
+</html>
