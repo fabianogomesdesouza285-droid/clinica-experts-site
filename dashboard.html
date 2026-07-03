@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel - VigoreFlow</title>
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body class="dash-body">
+
+  <aside class="dash-sidebar" id="sidebar">
+    <div class="dash-logo-wrap">
+      <img src="logo.png" alt="VigoreFlow" class="logo-img">
+    </div>
+    <nav class="dash-nav">
+      <button class="dash-nav-item active" data-view="inicio">
+        <span class="dash-nav-icon">HOME</span> Inicio
+      </button>
+      <button class="dash-nav-item" data-view="agenda">
+        <span class="dash-nav-icon">AGD</span> Agenda
+      </button>
+      <button class="dash-nav-item" data-view="pacientes">
+        <span class="dash-nav-icon">PAC</span> Pacientes
+      </button>
+      <button class="dash-nav-item" data-view="financeiro">
+        <span class="dash-nav-icon">FIN</span> Financeiro
+      </button>
+      <button class="dash-nav-item" data-view="estoque">
+        <span class="dash-nav-icon">EST</span> Estoque
+      </button>
+      <button class="dash-nav-item" data-view="config">
+        <span class="dash-nav-icon">CFG</span> Configuracoes
+      </button>
+    </nav>
+    <button id="btnLogout" class="dash-logout">Sair</button>
+  </aside>
+
+  <div class="dash-overlay" id="dashOverlay"></div>
+
+  <main class="dash-main">
+    <header class="dash-topbar">
+      <button id="btnMenu" class="dash-menu-btn">&#9776;</button>
+      <div class="dash-topbar-title" id="viewTitle">Inicio</div>
+      <div class="dash-user" id="userEmail">...</div>
+    </header>
+
+    <section class="dash-view active" id="view-inicio">
+      <div class="dash-cards">
+        <div class="dash-card">
+          <span class="dash-card-label">Pacientes cadastrados</span>
+          <span class="dash-card-value" id="statPacientes">0</span>
+        </div>
+        <div class="dash-card">
+          <span class="dash-card-label">Agendamentos futuros</span>
+          <span class="dash-card-value" id="statAgendamentos">0</span>
+        </div>
+        <div class="dash-card">
+          <span class="dash-card-label">Saldo do mes</span>
+          <span class="dash-card-value" id="statSaldo">R$ 0,00</span>
+        </div>
+      </div>
+      <div class="dash-panel">
+        <h3>Proximos agendamentos</h3>
+        <div id="listProximos" class="dash-list"><p class="dash-empty">Nenhum agendamento ainda.</p></div>
+      </div>
+    </section>
+
+    <section class="dash-view" id="view-agenda">
+      <div class="dash-panel">
+        <h3>Novo agendamento</h3>
+        <form id="formAgenda" class="dash-form-inline">
+          <input type="text" id="agTitulo" placeholder="Titulo (ex: Limpeza de pele)" required>
+          <select id="agPaciente"><option value="">Sem paciente vinculado</option></select>
+          <input type="datetime-local" id="agData" required>
+          <button type="submit" class="btn-dash-primary">Adicionar</button>
+        </form>
+      </div>
+      <div class="dash-panel">
+        <h3>Agendamentos</h3>
+        <div id="listAgenda" class="dash-list"><p class="dash-empty">Nenhum agendamento ainda.</p></div>
+      </div>
+    </section>
+
+    <section class="dash-view" id="view-pacientes">
+      <div class="dash-panel">
+        <h3>Novo paciente</h3>
+        <form id="formPaciente" class="dash-form-inline">
+          <input type="text" id="pacNome" placeholder="Nome completo" required>
+          <input type="text" id="pacWhatsapp" placeholder="WhatsApp">
+          <input type="email" id="pacEmail" placeholder="E-mail">
+          <button type="submit" class="btn-dash-primary">Adicionar</button>
+        </form>
+      </div>
+      <div class="dash-panel">
+        <h3>Lista de pacientes</h3>
+        <div id="listPacientes" class="dash-list"><p class="dash-empty">Nenhum paciente cadastrado.</p></div>
+      </div>
+    </section>
+
+    <section class="dash-view" id="view-financeiro">
+      <div class="dash-cards">
+        <div class="dash-card"><span class="dash-card-label">Entradas</span><span class="dash-card-value dash-green" id="finEntradas">R$ 0,00</span></div>
+        <div class="dash-card"><span class="dash-card-label">Saidas</span><span class="dash-card-value dash-red" id="finSaidas">R$ 0,00</span></div>
+        <div class="dash-card"><span class="dash-card-label">Saldo</span><span class="dash-card-value" id="finSaldo">R$ 0,00</span></div>
+      </div>
+      <div class="dash-panel">
+        <h3>Novo lancamento</h3>
+        <form id="formFinanceiro" class="dash-form-inline">
+          <select id="finTipo">
+            <option value="entrada">Entrada</option>
+            <option value="saida">Saida</option>
+          </select>
+          <input type="text" id="finDescricao" placeholder="Descricao" required>
+          <input type="number" id="finValor" placeholder="Valor (R$)" step="0.01" required>
+          <input type="date" id="finData" required>
+          <button type="submit" class="btn-dash-primary">Adicionar</button>
+        </form>
+      </div>
+      <div class="dash-panel">
+        <h3>Lancamentos</h3>
+        <div id="listFinanceiro" class="dash-list"><p class="dash-empty">Nenhum lancamento ainda.</p></div>
+      </div>
+    </section>
+
+    <section class="dash-view" id="view-estoque">
+      <div class="dash-panel">
+        <h3>Novo item</h3>
+        <form id="formEstoque" class="dash-form-inline">
+          <input type="text" id="estNome" placeholder="Nome do item" required>
+          <input type="number" id="estQtd" placeholder="Quantidade" required>
+          <input type="number" id="estQtdMin" placeholder="Qtd. minima">
+          <input type="number" id="estPreco" placeholder="Preco (R$)" step="0.01">
+          <button type="submit" class="btn-dash-primary">Adicionar</button>
+        </form>
+      </div>
+      <div class="dash-panel">
+        <h3>Itens em estoque</h3>
+        <div id="listEstoque" class="dash-list"><p class="dash-empty">Nenhum item cadastrado.</p></div>
+      </div>
+    </section>
+
+    <section class="dash-view" id="view-config">
+      <div class="dash-panel">
+        <h3>Minha conta</h3>
+        <p><strong>E-mail:</strong> <span id="cfgEmail">-</span></p>
+        <p><strong>Nome da clinica:</strong> <span id="cfgClinica">-</span></p>
+        <p><strong>Plano:</strong> <span id="cfgPlano">-</span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
