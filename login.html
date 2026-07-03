@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entrar - VigoreFlow</title>
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="auth.css">
+</head>
+<body class="auth-body">
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <a href="index.html"><img src="logo.png" alt="VigoreFlow" class="logo-img auth-logo"></a>
+      <p class="auth-subtitle">Acesse o painel da sua clinica</p>
+
+      <div class="auth-tabs">
+        <button id="tab-login" class="auth-tab active" type="button">Entrar</button>
+        <button id="tab-signup" class="auth-tab" type="button">Criar conta</button>
+      </div>
+
+      <form id="formLogin" class="auth-form">
+        <label for="loginEmail">E-mail</label>
+        <input type="email" id="loginEmail" required placeholder="seu@email.com">
+        <label for="loginPassword">Senha</label>
+        <input type="password" id="loginPassword" required placeholder="********">
+        <div id="loginError" class="auth-error" style="display:none"></div>
+        <button type="submit" id="loginBtn" class="btn-primary auth-submit">Entrar</button>
+      </form>
+
+      <form id="formSignup" class="auth-form" style="display:none">
+        <label for="signupClinica">Nome da clinica</label>
+        <input type="text" id="signupClinica" required placeholder="Nome da sua clinica">
+        <label for="signupEmail">E-mail</label>
+        <input type="email" id="signupEmail" required placeholder="seu@email.com">
+        <label for="signupPassword">Senha</label>
+        <input type="password" id="signupPassword" required placeholder="Minimo 6 caracteres" minlength="6">
+        <div id="signupError" class="auth-error" style="display:none"></div>
+        <div id="signupSuccess" class="auth-success" style="display:none">Conta criada com sucesso! Entrando...</div>
+        <button type="submit" id="signupBtn" class="btn-primary auth-submit">Criar conta gratis</button>
+      </form>
+
+      <a href="index.html" class="auth-back">Voltar ao site</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>
