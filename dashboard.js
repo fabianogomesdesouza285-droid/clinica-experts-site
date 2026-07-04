@@ -27,6 +27,9 @@ async function init() {
   }
   document.getElementById('cfgClinica').textContent = perfil ? perfil.nome_clinica : '-';
   document.getElementById('cfgPlano').textContent = perfil ? perfil.plano : '-';
+document.getElementById('assPlano').textContent = perfil ? perfil.plano : '-';
+document.getElementById('assClinica').textContent = perfil ? perfil.nome_clinica : '-';
+document.getElementById('assEmail').textContent = user.email;
 
   await loadPacientes();
   await loadAgenda();
@@ -496,7 +499,7 @@ loadFornecedores();
 var navItems = document.querySelectorAll('.dash-nav-item');
 var views = document.querySelectorAll('.dash-view');
 var viewTitleEl = document.getElementById('viewTitle');
-var viewTitles = { inicio: 'Inicio', agenda: 'Agenda', pacientes: 'Pacientes', atendimentos: 'Atendimentos', vendas: 'Vendas', financeiro: 'Financeiro', estoque: 'Estoque', config: 'Configuracoes' , comissoes: 'Comissoes', profissionais: 'Profissionais', procedimentos: 'Procedimentos'};
+var viewTitles = { inicio: 'Inicio', agenda: 'Agenda', pacientes: 'Pacientes', atendimentos: 'Atendimentos', vendas: 'Vendas', financeiro: 'Financeiro', estoque: 'Estoque', config: 'Configuracoes' , comissoes: 'Comissoes', profissionais: 'Profissionais', procedimentos: 'Procedimentos', assinatura: 'Assinatura'};
 
 navItems.forEach(function (btn) {
   btn.addEventListener('click', function () {
