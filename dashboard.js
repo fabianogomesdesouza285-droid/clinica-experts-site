@@ -34,6 +34,7 @@ async function init() {
   await loadEstoque();
       await loadAtendimentos();
   await loadVendas();
+  await loadComissoes();
 }
 
 async function loadPacientes() {
@@ -282,10 +283,76 @@ document.getElementById('formEstoque').addEventListener('submit', async function
   loadEstoque();
 });
 
+async function loadComissoes() {
+    var res = await sbAuth.from('comissoes').select('*').eq('user_id', currentUserId).order('data_referencia', { ascending: false });
+    var list = res.data || [];
+    var aberto = 0, pago = 0;
+    list.forEach(function (c) { var v = parseFloat(c.valor_comissao); if (c.status === 'pago') pago += v; else aberto += v; });
+    document.getElementById('comAberto').textContent = fmtMoney(aberto);
+    document.getElementById('comPagas').textContent = fmtMoney(pago);
+    document.getElementById('comTotal').textContent = fmtMoney(aberto + pago);
+    var container = document.getElementById('listComissoes');
+    if (list.length === 0) { container.innerHTML = '<p class="dash-empty">Nenhuma comissao ainda.</p>'; return; }
+    container.innerHTML = '';
+    list.forEach(function (c) {
+          var row = document.createElement('div');
+          row.className = 'dash-row';
+          var info = document.createElement('div');
+          info.className = 'dash-row-info';
+          var title = document.createElement('span');
+          title.className = 'dash-row-title';
+          title.textContent = c.descricao + ' - ' + fmtMoney(c.valor_comissao);
+          var sub = document.createElement('span');
+          sub.className = 'dash-row-sub';
+          var dt = new Date(c.data_referencia + 'T00:00:00');
+          var statusLabel = c.status === 'pago' ? 'Paga' : 'Em aberto';
+          sub.textContent = dt.toLocaleDateString('pt-BR') + (c.profissional ? ' - ' + c.profissional : '') + ' - ' + statusLabel;
+          info.appendChild(title);
+          info.appendChild(sub);
+          row.appendChild(info);
+          if (c.status !== 'pago') {
+                  var payBtn = document.createElement('button');
+                  payBtn.className = 'btn-dash-primary';
+                  payBtn.textContent = 'Marcar como pago';
+                  payBtn.addEventListener('click', async function () {
+                            await sbAuth.from('comissoes').update({ status: 'pago', data_pagamento: new Date().toISOString().slice(0, 10) }).eq('id', c.id);
+                            loadComissoes();
+                  });
+                  row.appendChild(payBtn);
+          }
+          var btn = document.createElement('button');
+          btn.className = 'dash-del-btn';
+          btn.textContent = 'Remover';
+          btn.addEventListener('click', async function () {
+                  await sbAuth.from('comissoes').delete().eq('id', c.id);
+                  loadComissoes();
+          });
+          row.appendChild(btn);
+          container.appendChild(row);
+    });
+}
+
+document.getElementById('formComissao').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var profissional = document.getElementById('comProfissional').value.trim();
+    var descricao = document.getElementById('comDescricao').value.trim();
+    var valorBaseRaw = document.getElementById('comValorBase').value;
+    var percentualRaw = document.getElementById('comPercentual').value;
+    var valorComissaoRaw = document.getElementById('comValorComissao').value;
+    var dataVal = document.getElementById('comData').value;
+    if (!descricao || !dataVal) return;
+    var valorBase = valorBaseRaw ? parseFloat(valorBaseRaw) : null;
+    var percentual = percentualRaw ? parseFloat(percentualRaw) : null;
+    var valorComissao = valorComissaoRaw ? parseFloat(valorComissaoRaw) : ((valorBase && percentual) ? (valorBase * percentual / 100) : 0);
+    await sbAuth.from('comissoes').insert([{ user_id: currentUserId, profissional: profissional || null, descricao: descricao, valor_base: valorBase, percentual: percentual, valor_comissao: valorComissao, status: 'aberto', data_referencia: dataVal }]);
+    e.target.reset();
+    loadComissoes();
+});
+
 var navItems = document.querySelectorAll('.dash-nav-item');
 var views = document.querySelectorAll('.dash-view');
 var viewTitleEl = document.getElementById('viewTitle');
-var viewTitles = { inicio: 'Inicio', agenda: 'Agenda', pacientes: 'Pacientes', atendimentos: 'Atendimentos', vendas: 'Vendas', financeiro: 'Financeiro', estoque: 'Estoque', config: 'Configuracoes' };
+var viewTitles = { inicio: 'Inicio', agenda: 'Agenda', pacientes: 'Pacientes', atendimentos: 'Atendimentos', vendas: 'Vendas', financeiro: 'Financeiro', estoque: 'Estoque', config: 'Configuracoes' , comissoes: 'Comissoes'};
 
 navItems.forEach(function (btn) {
   btn.addEventListener('click', function () {
