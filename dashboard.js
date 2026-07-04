@@ -151,7 +151,7 @@ function renderAgendaList(container, list) {
     info.className = 'dash-row-info';
     var title = document.createElement('span');
     title.className = 'dash-row-title';
-    title.textContent = ev.titulo;
+    title.textContent = (ev.status === 'bloqueado' ? '[Bloqueio] ' : '') + ev.titulo;
     var sub = document.createElement('span');
     sub.className = 'dash-row-sub';
     var dt = new Date(ev.data_inicio);
@@ -176,10 +176,10 @@ async function loadAgenda() {
   var res = await sbAuth.from('agenda_eventos').select('*, pacientes(nome)').eq('user_id', currentUserId).order('data_inicio', { ascending: true });
   var list = res.data || [];
   var now = new Date();
-  var futuros = list.filter(function (e) { return new Date(e.data_inicio) >= now; });
+  var futuros = list.filter(function (e) { return new Date(e.data_inicio) >= now && e.status !== 'bloqueado'; });
   document.getElementById('statAgendamentos').textContent = futuros.length;
   renderAgendaList(document.getElementById('listAgenda'), list);
-  renderAgendaList(document.getElementById('listProximos'), futuros.slice(0, 5));
+  renderAgendaList(document.getElementById('listProximos'), futuros.slice(0, 5)); agEventosCache = list; renderAgendaCalendar();
 }
 
 async function loadFinanceiro() {
@@ -722,3 +722,271 @@ init();
 // v4
 
 // v5-redeploy-marker
+
+// ===== Agenda - calendario (dia/semana/mes) =====
+var agViewMode = 'semana';
+var agRefDate = new Date();
+var agEventosCache = [];
+var AG_HORA_INICIO = 7;
+var AG_HORA_FIM = 21;
+var AG_ALTURA_HORA = 48;
+
+function agStartOfWeek(d) {
+    var r = new Date(d);
+    r.setHours(0, 0, 0, 0);
+    r.setDate(r.getDate() - r.getDay());
+    return r;
+}
+
+function agAddDays(d, n) {
+    var r = new Date(d);
+    r.setDate(r.getDate() + n);
+    return r;
+}
+
+function agSameDay(a, b) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+function agFmtRangeLabel() {
+    if (agViewMode === 'dia') {
+          return agRefDate.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+    }
+    if (agViewMode === 'mes') {
+          return agRefDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    }
+    var ini = agStartOfWeek(agRefDate);
+    var fim = agAddDays(ini, 6);
+    return ini.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' - ' + fim.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function agEventosNoIntervalo(inicio, fim) {
+    return agEventosCache.filter(function (ev) {
+          var d = new Date(ev.data_inicio);
+          return d >= inicio && d < fim;
+    });
+}
+
+function agRenderHorasGrade(col) {
+    for (var h = AG_HORA_INICIO; h < AG_HORA_FIM; h++) {
+          var lbl = document.createElement('div');
+          lbl.className = 'dash-cal-hour-label';
+          lbl.textContent = (h < 10 ? '0' + h : h) + ':00';
+          col.appendChild(lbl);
+    }
+}
+
+function agCriarColunaDia(dia, hoje) {
+    var col = document.createElement('div');
+    col.className = 'dash-cal-day-col';
+    col.style.height = ((AG_HORA_FIM - AG_HORA_INICIO) * AG_ALTURA_HORA) + 'px';
+    var inicioDia = new Date(dia); inicioDia.setHours(0, 0, 0, 0);
+    var fimDia = agAddDays(inicioDia, 1);
+    var eventos = agEventosNoIntervalo(inicioDia, fimDia);
+    eventos.forEach(function (ev) {
+          var d = new Date(ev.data_inicio);
+          var horaDecimal = d.getHours() + d.getMinutes() / 60;
+          if (horaDecimal < AG_HORA_INICIO || horaDecimal >= AG_HORA_FIM) return;
+          var top = (horaDecimal - AG_HORA_INICIO) * AG_ALTURA_HORA;
+          var bloqueado = ev.status === 'bloqueado';
+          var evEl = document.createElement('div');
+          evEl.className = 'dash-cal-event' + (bloqueado ? ' blocked' : '');
+          evEl.style.top = top + 'px';
+          var durMin = 30;
+          if (ev.data_fim) {
+                  var df = new Date(ev.data_fim);
+                  durMin = Math.max(20, Math.round((df - d) / 60000));
+          }
+          evEl.style.height = Math.max(20, (durMin / 60) * AG_ALTURA_HORA) + 'px';
+          var horaTxt = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          evEl.textContent = horaTxt + ' ' + (bloqueado ? '[Bloqueio] ' : '') + ev.titulo;
+          evEl.title = ev.titulo;
+          evEl.addEventListener('click', async function () {
+                  if (confirm('Remover "' + ev.titulo + '"?')) {
+                            await sbAuth.from('agenda_eventos').delete().eq('id', ev.id);
+                            loadAgenda();
+                  }
+          });
+          col.appendChild(evEl);
+    });
+    return col;
+}
+
+function agRenderDiaSemana(container) {
+    var dias = agViewMode === 'dia' ? [new Date(agRefDate)] : (function () {
+          var ini = agStartOfWeek(agRefDate);
+          var arr = [];
+          for (var i = 0; i < 7; i++) arr.push(agAddDays(ini, i));
+          return arr;
+    })();
+    var hoje = new Date();
+
+  var wrap = document.createElement('div');
+    wrap.className = 'dash-cal-wrap';
+
+  var header = document.createElement('div');
+    header.className = 'dash-cal-header';
+    header.style.gridTemplateColumns = '60px repeat(' + dias.length + ', 1fr)';
+    var vazio = document.createElement('div');
+    header.appendChild(vazio);
+    dias.forEach(function (d) {
+          var cell = document.createElement('div');
+          cell.className = 'dash-cal-header-cell' + (agSameDay(d, hoje) ? ' today' : '');
+          cell.textContent = d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' });
+          header.appendChild(cell);
+    });
+    wrap.appendChild(header);
+
+  var body = document.createElement('div');
+    body.className = 'dash-cal-body';
+    body.style.gridTemplateColumns = '60px repeat(' + dias.length + ', 1fr)';
+    var timeCol = document.createElement('div');
+    timeCol.className = 'dash-cal-time-col';
+    agRenderHorasGrade(timeCol);
+    body.appendChild(timeCol);
+    dias.forEach(function (d) {
+          body.appendChild(agCriarColunaDia(d, hoje));
+    });
+    wrap.appendChild(body);
+
+  container.innerHTML = '';
+    container.appendChild(wrap);
+}
+
+function agRenderMes(container) {
+    var ano = agRefDate.getFullYear();
+    var mes = agRefDate.getMonth();
+    var primeiroDia = new Date(ano, mes, 1);
+    var inicioGrade = agAddDays(primeiroDia, -primeiroDia.getDay());
+    var hoje = new Date();
+
+  var wrap = document.createElement('div');
+    wrap.className = 'dash-cal-month-wrap';
+
+  var head = document.createElement('div');
+    head.className = 'dash-cal-month-head';
+    ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'].forEach(function (n) {
+          var hc = document.createElement('div');
+          hc.className = 'dash-cal-month-headcell';
+          hc.textContent = n;
+          head.appendChild(hc);
+    });
+    wrap.appendChild(head);
+
+  var grid = document.createElement('div');
+    grid.className = 'dash-cal-month-grid';
+    for (var i = 0; i < 42; i++) {
+          var dia = agAddDays(inicioGrade, i);
+          var inicioDia = new Date(dia); inicioDia.setHours(0, 0, 0, 0);
+          var fimDia = agAddDays(inicioDia, 1);
+          var eventos = agEventosNoIntervalo(inicioDia, fimDia);
+          var cell = document.createElement('div');
+          cell.className = 'dash-cal-month-cell' + (dia.getMonth() !== mes ? ' other-month' : '') + (agSameDay(dia, hoje) ? ' today' : '');
+          var dateLbl = document.createElement('div');
+          dateLbl.className = 'dash-cal-month-date';
+          dateLbl.textContent = String(dia.getDate());
+          cell.appendChild(dateLbl);
+          eventos.slice(0, 3).forEach(function (ev) {
+                  var bloqueado = ev.status === 'bloqueado';
+                  var evEl = document.createElement('div');
+                  evEl.className = 'dash-cal-month-event' + (bloqueado ? ' blocked' : '');
+                  evEl.textContent = (bloqueado ? '[Bloqueio] ' : '') + ev.titulo;
+                  evEl.addEventListener('click', async function () {
+                            if (confirm('Remover "' + ev.titulo + '"?')) {
+                                        await sbAuth.from('agenda_eventos').delete().eq('id', ev.id);
+                                        loadAgenda();
+                            }
+                  });
+                  cell.appendChild(evEl);
+          });
+          if (eventos.length > 3) {
+                  var more = document.createElement('div');
+                  more.className = 'dash-cal-month-more';
+                  more.textContent = '+' + (eventos.length - 3) + ' mais';
+                  cell.appendChild(more);
+          }
+          grid.appendChild(cell);
+    }
+    wrap.appendChild(grid);
+
+  container.innerHTML = '';
+    container.appendChild(wrap);
+}
+
+function agAtualizarStats() {
+    var ini, fim;
+    if (agViewMode === 'dia') {
+          ini = new Date(agRefDate); ini.setHours(0, 0, 0, 0);
+          fim = agAddDays(ini, 1);
+    } else if (agViewMode === 'mes') {
+          ini = new Date(agRefDate.getFullYear(), agRefDate.getMonth(), 1);
+          fim = new Date(agRefDate.getFullYear(), agRefDate.getMonth() + 1, 1);
+    } else {
+          ini = agStartOfWeek(agRefDate);
+          fim = agAddDays(ini, 7);
+    }
+    var eventos = agEventosNoIntervalo(ini, fim);
+    var bloqueios = eventos.filter(function (e) { return e.status === 'bloqueado'; }).length;
+    var totalEl = document.getElementById('agTotalPeriodo');
+    if (totalEl) totalEl.textContent = eventos.length + ' agendamento(s)' + (bloqueios > 0 ? ' - ' + bloqueios + ' bloqueio(s)' : '');
+    var ocupEl = document.getElementById('agOcupacao');
+    if (ocupEl) {
+          var dias = agViewMode === 'dia' ? 1 : (agViewMode === 'mes' ? 30 : 7);
+          var horasDisponiveis = dias * (AG_HORA_FIM - AG_HORA_INICIO);
+          var ocupPct = horasDisponiveis > 0 ? Math.min(100, Math.round((eventos.length / horasDisponiveis) * 100)) : 0;
+          ocupEl.textContent = 'Ocupacao: ' + ocupPct + '%';
+    }
+}
+
+function renderAgendaCalendar() {
+    var container = document.getElementById('agendaGrid');
+    if (!container) return;
+    var lbl = document.getElementById('agRangeLabel');
+    if (lbl) lbl.textContent = agFmtRangeLabel();
+    if (agViewMode === 'mes') {
+          agRenderMes(container);
+    } else {
+          agRenderDiaSemana(container);
+    }
+    agAtualizarStats();
+}
+
+document.addEventListener('click', function (e) {
+    var viewBtn = e.target.closest && e.target.closest('.dash-agenda-view-btn');
+    if (viewBtn) {
+          document.querySelectorAll('.dash-agenda-view-btn').forEach(function (b) { b.classList.remove('active'); });
+          viewBtn.classList.add('active');
+          agViewMode = viewBtn.getAttribute('data-agview');
+          renderAgendaCalendar();
+          return;
+    }
+    if (e.target.id === 'agPrev' || e.target.id === 'agNext') {
+          var delta = e.target.id === 'agPrev' ? -1 : 1;
+          if (agViewMode === 'dia') agRefDate = agAddDays(agRefDate, delta);
+          else if (agViewMode === 'mes') agRefDate = new Date(agRefDate.getFullYear(), agRefDate.getMonth() + delta, 1);
+          else agRefDate = agAddDays(agRefDate, delta * 7);
+          renderAgendaCalendar();
+          return;
+    }
+    if (e.target.id === 'agHoje') {
+          agRefDate = new Date();
+          renderAgendaCalendar();
+          return;
+    }
+});
+
+var formBloqueioEl = document.getElementById('formBloqueio');
+if (formBloqueioEl) {
+    formBloqueioEl.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          var titulo = document.getElementById('blTitulo').value.trim();
+          var inicioStr = document.getElementById('blInicio').value;
+          var fimStr = document.getElementById('blFim').value;
+          if (!titulo || !inicioStr || !fimStr) return;
+          await sbAuth.from('agenda_eventos').insert([{ user_id: currentUserId, titulo: titulo, data_inicio: new Date(inicioStr).toISOString(), data_fim: new Date(fimStr).toISOString(), status: 'bloqueado' }]);
+          e.target.reset();
+          loadAgenda();
+    });
+}
+
+// v6-agenda-calendario
