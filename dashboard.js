@@ -156,6 +156,15 @@ async function loadFinanceiro() {
   document.getElementById('finEntradas').textContent = fmtMoney(entradas);
   document.getElementById('finSaidas').textContent = fmtMoney(saidas);
   document.getElementById('finSaldo').textContent = fmtMoney(entradas - saidas);
+var aReceber = 0, aPagar = 0;
+list.forEach(function (l) {
+  if (l.status === 'pendente') {
+    var vp = parseFloat(l.valor);
+    if (l.tipo === 'entrada') aReceber += vp; else aPagar += vp;
+  }
+});
+document.getElementById('finAReceber').textContent = fmtMoney(aReceber);
+document.getElementById('finAPagar').textContent = fmtMoney(aPagar);
 
   var nowD = new Date();
   var mEntradas = 0, mSaidas = 0;
@@ -185,9 +194,20 @@ async function loadFinanceiro() {
     title.textContent = l.descricao;
     var sub = document.createElement('span');
     sub.className = 'dash-row-sub';
-    sub.textContent = l.data_lancamento + ' - ' + (l.tipo === 'entrada' ? '+' : '-') + fmtMoney(l.valor);
+    sub.textContent = l.data_lancamento + ' - ' + (l.tipo === 'entrada' ? '+' : '-') + fmtMoney(l.valor) + ' - ' + (l.status === 'pendente' ? 'Pendente' : 'Pago') + (l.vencimento ? ' - Venc: ' + l.vencimento : '');
     info.appendChild(title);
     info.appendChild(sub);
+row.appendChild(info);
+if (l.status === 'pendente') {
+  var payBtn = document.createElement('button');
+  payBtn.className = 'btn-dash-primary';
+  payBtn.textContent = 'Marcar como pago';
+  payBtn.addEventListener('click', async function () {
+    await sbAuth.from('financeiro_lancamentos').update({ status: 'pago' }).eq('id', l.id);
+    loadFinanceiro();
+  });
+  row.appendChild(payBtn);
+}
     var btn = document.createElement('button');
     btn.className = 'dash-del-btn';
     btn.textContent = 'Remover';
@@ -195,7 +215,6 @@ async function loadFinanceiro() {
       await sbAuth.from('financeiro_lancamentos').delete().eq('id', l.id);
       loadFinanceiro();
     });
-    row.appendChild(info);
     row.appendChild(btn);
     container.appendChild(row);
   });
@@ -276,8 +295,10 @@ document.getElementById('formFinanceiro').addEventListener('submit', async funct
   var descricao = document.getElementById('finDescricao').value.trim();
   var valor = parseFloat(document.getElementById('finValor').value);
   var dataVal = document.getElementById('finData').value;
+var finStatusVal = document.getElementById('finStatus').value;
+var finVencimentoVal = document.getElementById('finVencimento').value;
   if (!descricao || isNaN(valor) || !dataVal) return;
-  await sbAuth.from('financeiro_lancamentos').insert([{ user_id: currentUserId, tipo: tipo, descricao: descricao, valor: valor, data_lancamento: dataVal }]);
+  await sbAuth.from('financeiro_lancamentos').insert([{ user_id: currentUserId, tipo: tipo, descricao: descricao, valor: valor, data_lancamento: dataVal, status: finStatusVal || 'pago', vencimento: finVencimentoVal || null }]);
   e.target.reset();
   loadFinanceiro();
 });
