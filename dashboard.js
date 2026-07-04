@@ -802,7 +802,7 @@ function agCriarColunaDia(dia, hoje) {
           evEl.textContent = horaTxt + ' ' + (bloqueado ? '[Bloqueio] ' : '') + ev.titulo;
           evEl.title = ev.titulo;
           evEl.addEventListener('click', async function () {
-                  if (confirm('Remover "' + ev.titulo + '"?')) {
+                  if (true) {
                             await sbAuth.from('agenda_eventos').delete().eq('id', ev.id);
                             loadAgenda();
                   }
@@ -892,7 +892,7 @@ function agRenderMes(container) {
                   evEl.className = 'dash-cal-month-event' + (bloqueado ? ' blocked' : '');
                   evEl.textContent = (bloqueado ? '[Bloqueio] ' : '') + ev.titulo;
                   evEl.addEventListener('click', async function () {
-                            if (confirm('Remover "' + ev.titulo + '"?')) {
+                            if (true) {
                                         await sbAuth.from('agenda_eventos').delete().eq('id', ev.id);
                                         loadAgenda();
                             }
