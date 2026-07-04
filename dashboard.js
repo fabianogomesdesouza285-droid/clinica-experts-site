@@ -356,6 +356,10 @@ document.getElementById('formComissao').addEventListener('submit', async functio
 });
 
 async function loadProfissionais() {
+  var res = await sbAuth.from('profissionais').select('*').eq('user_id', currentUserId).order('nome', { ascending: true });
+var list = res.data || [];
+var selCom = document.getElementById('comProfissional'); selCom.innerHTML = '<option value="">Sem profissional</option>'; list.forEach(function (p) { var o = document.createElement('option'); o.value = p.nome; o.textContent = p.nome; selCom.appendChild(o); });
+var selAtd = document.getElementById('atdProfissional'); selAtd.innerHTML = '<option value="">Sem profissional</option>'; list.forEach(function (p) { var o2 = document.createElement('option'); o2.value = p.nome; o2.textContent = p.nome; selAtd.appendChild(o2); });
 var res = await sbAuth.from('profissionais').select('*').eq('user_id', currentUserId).order('nome', { ascending: true });
 var list = res.data || [];
 var container = document.getElementById('listProfissionais');
@@ -392,6 +396,9 @@ container.appendChild(row);
 }
 
 async function loadProcedimentos() {
+  var res = await sbAuth.from('procedimentos').select('*').eq('user_id', currentUserId).order('nome', { ascending: true });
+var list = res.data || [];
+var selAtdProc = document.getElementById('atdProcedimento'); selAtdProc.innerHTML = '<option value="">Selecione um procedimento</option>'; list.forEach(function (p) { var o = document.createElement('option'); o.value = p.nome; o.textContent = p.nome + (p.preco ? ' - ' + fmtMoney(p.preco) : ''); selAtdProc.appendChild(o); });
 var res = await sbAuth.from('procedimentos').select('*').eq('user_id', currentUserId).order('nome', { ascending: true });
 var list = res.data || [];
 var container = document.getElementById('listProcedimentos');
