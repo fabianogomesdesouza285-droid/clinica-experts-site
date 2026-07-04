@@ -210,6 +210,24 @@
       </div>
   </section>
     <section class="dash-view" id="view-vendas">
+      <div class="dash-cards">
+        <div class="dash-card">
+          <span class="dash-card-label">Faturamento</span>
+          <span class="dash-card-value" id="vndStatFaturamento">R$ 0,00</span>
+        </div>
+        <div class="dash-card">
+          <span class="dash-card-label">Vendas</span>
+          <span class="dash-card-value" id="vndStatCount">0</span>
+        </div>
+        <div class="dash-card">
+          <span class="dash-card-label">Ticket medio</span>
+          <span class="dash-card-value" id="vndStatTicket">R$ 0,00</span>
+        </div>
+        <div class="dash-card">
+          <span class="dash-card-label">Valor pendente</span>
+          <span class="dash-card-value" id="vndStatPendente">R$ 0,00</span>
+        </div>
+      </div>
       <div class="dash-panel">
         <h3>Nova venda</h3>
   <form id="formVenda" class="dash-form-inline">
@@ -234,6 +252,14 @@
       <div class="dash-panel">
         <h3>Vendas</h3>
         <div id="listVendas" class="dash-list"><p class="dash-empty">Nenhuma venda ainda.</p></div>
+      <div class="dash-panel">
+        <h3>Ranking por procedimento/produto</h3>
+        <div id="listVendasRankingProduto" class="dash-list"><p class="dash-empty">Sem dados ainda.</p></div>
+      </div>
+      <div class="dash-panel">
+        <h3>Ranking por paciente</h3>
+        <div id="listVendasRankingPaciente" class="dash-list"><p class="dash-empty">Sem dados ainda.</p></div>
+      </div>
       </div>
     </section>
     <section class="dash-view" id="view-financeiro">
