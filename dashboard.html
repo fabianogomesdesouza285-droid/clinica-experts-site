@@ -27,6 +27,9 @@
         <button class="dash-nav-item" data-view="leads">
           <span class="dash-nav-icon">LED</span> Leads
         </button>
+          <button class="dash-nav-item" data-view="aniversariantes">
+            <span class="dash-nav-icon">BDAY</span> Aniversariantes
+          </button>
 <button class="dash-nav-item" data-view="atendimentos">
           <span class="dash-nav-icon">ATD</span> Atendimentos
         </button>
@@ -115,6 +118,7 @@
           <input type="text" id="pacNome" placeholder="Nome completo" required>
           <input type="text" id="pacWhatsapp" placeholder="WhatsApp">
           <input type="email" id="pacEmail" placeholder="E-mail">
+            <input type="date" id="pacNascimento" placeholder="Data de nascimento">
           <button type="submit" class="btn-dash-primary">Adicionar</button>
         </form>
       </div>
@@ -146,6 +150,32 @@
         <div id="listLeads" class="dash-list"><p class="dash-empty">Nenhum lead cadastrado.</p></div>
       </div>
     </section>
+
+      <section class="dash-view" id="view-aniversariantes">
+        <div class="dash-panel">
+          <h3>Aniversariantes</h3>
+          <div class="dash-form-inline">
+            <select id="aniMes">
+              <option value="1">Janeiro</option>
+              <option value="2">Fevereiro</option>
+              <option value="3">Marco</option>
+              <option value="4">Abril</option>
+              <option value="5">Maio</option>
+              <option value="6">Junho</option>
+              <option value="7">Julho</option>
+              <option value="8">Agosto</option>
+              <option value="9">Setembro</option>
+              <option value="10">Outubro</option>
+              <option value="11">Novembro</option>
+              <option value="12">Dezembro</option>
+            </select>
+          </div>
+        </div>
+        <div class="dash-panel">
+          <h3>Lista de aniversariantes</h3>
+          <div id="listAniversariantes" class="dash-list"><p class="dash-empty">Nenhum aniversariante neste mes.</p></div>
+        </div>
+      </section>
   <section class="dash-view" id="view-atendimentos">
       <div class="dash-panel">
             <h3>Novo atendimento</h3>
