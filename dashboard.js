@@ -531,3 +531,5 @@ overlayEl.addEventListener('click', closeSidebar);
 document.getElementById('btnLogout').addEventListener('click', vfSignOut);
 
 init();
+
+// v3
