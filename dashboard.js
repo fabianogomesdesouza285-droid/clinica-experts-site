@@ -43,6 +43,8 @@ document.getElementById('assEmail').textContent = user.email;
 await loadProcedimentos();
 await loadFornecedores();
   await loadLeads();
+document.getElementById('aniMes').value = String(new Date().getMonth() + 1);
+    await loadAniversariantes();
 }
 
 async function loadPacientes() {
@@ -246,8 +248,9 @@ document.getElementById('formPaciente').addEventListener('submit', async functio
   var nome = document.getElementById('pacNome').value.trim();
   var whatsapp = document.getElementById('pacWhatsapp').value.trim();
   var email = document.getElementById('pacEmail').value.trim();
+  var nascimento = document.getElementById('pacNascimento').value;
   if (!nome) return;
-  await sbAuth.from('pacientes').insert([{ user_id: currentUserId, nome: nome, whatsapp: whatsapp || null, email: email || null }]);
+  await sbAuth.from('pacientes').insert([{ user_id: currentUserId, nome: nome, whatsapp: whatsapp || null, email: email || null, data_nascimento: nascimento || null }]);
   e.target.reset();
   loadPacientes();
 });
@@ -577,10 +580,51 @@ e.target.reset();
 loadLeads();
 });
 
+async function loadAniversariantes() {
+var mesSel = document.getElementById('aniMes');
+var mes = parseInt(mesSel.value, 10);
+var res = await sbAuth.from('pacientes').select('*').eq('user_id', currentUserId);
+var list = res.data || [];
+var filtrados = list.filter(function (p) {
+if (!p.data_nascimento) return false;
+var d = new Date(p.data_nascimento + 'T00:00:00');
+return (d.getMonth() + 1) === mes;
+});
+filtrados.sort(function (a, b) {
+var da = new Date(a.data_nascimento + 'T00:00:00').getDate();
+var db = new Date(b.data_nascimento + 'T00:00:00').getDate();
+return da - db;
+});
+var container = document.getElementById('listAniversariantes');
+if (filtrados.length === 0) { container.innerHTML = '<p class="dash-empty">Nenhum aniversariante neste mes.</p>'; return; }
+container.innerHTML = '';
+filtrados.forEach(function (p) {
+var row = document.createElement('div');
+row.className = 'dash-row';
+var info = document.createElement('div');
+info.className = 'dash-row-info';
+var title = document.createElement('span');
+title.className = 'dash-row-title';
+title.textContent = p.nome;
+var sub = document.createElement('span');
+sub.className = 'dash-row-sub';
+var d = new Date(p.data_nascimento + 'T00:00:00');
+var subParts = [d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })];
+if (p.whatsapp) subParts.push(p.whatsapp);
+sub.textContent = subParts.join(' - ');
+info.appendChild(title);
+info.appendChild(sub);
+row.appendChild(info);
+container.appendChild(row);
+});
+}
+
+document.getElementById('aniMes').addEventListener('change', loadAniversariantes);
+
 var navItems = document.querySelectorAll('.dash-nav-item');
 var views = document.querySelectorAll('.dash-view');
 var viewTitleEl = document.getElementById('viewTitle');
-var viewTitles = { inicio: 'Inicio', agenda: 'Agenda', pacientes: 'Pacientes', atendimentos: 'Atendimentos', vendas: 'Vendas', financeiro: 'Financeiro', estoque: 'Estoque', config: 'Configuracoes' , comissoes: 'Comissoes', profissionais: 'Profissionais', procedimentos: 'Procedimentos', assinatura: 'Assinatura', leads: 'Leads'};
+var viewTitles = { inicio: 'Inicio', agenda: 'Agenda', pacientes: 'Pacientes', atendimentos: 'Atendimentos', vendas: 'Vendas', financeiro: 'Financeiro', estoque: 'Estoque', config: 'Configuracoes' , comissoes: 'Comissoes', profissionais: 'Profissionais', procedimentos: 'Procedimentos', assinatura: 'Assinatura', leads: 'Leads', aniversariantes: 'Aniversariantes'};
 
 navItems.forEach(function (btn) {
   btn.addEventListener('click', function () {
