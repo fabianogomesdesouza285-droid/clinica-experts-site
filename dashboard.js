@@ -1,4 +1,5 @@
 // ============================================
+// v2
 // VigoreFlow - dashboard.js
 // Logica do painel de assinantes (CRUD Supabase)
 // ============================================
