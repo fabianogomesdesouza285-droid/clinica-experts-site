@@ -39,7 +39,13 @@
       <button class="dash-nav-item" data-view="comissoes">
         <span class="dash-nav-icon">COM</span> Comissoes
       </button>
-      <button class="dash-nav-item" data-view="config">
+      <button class="dash-nav-item" data-view="profissionais">
+  <span class="dash-nav-icon">PRF</span> Profissionais
+</button>
+<button class="dash-nav-item" data-view="procedimentos">
+  <span class="dash-nav-icon">PRC</span> Procedimentos
+</button>
+<button class="dash-nav-item" data-view="config">
         <span class="dash-nav-icon">CFG</span> Configuracoes
       </button>
     </nav>
@@ -199,6 +205,19 @@
         <h3>Itens em estoque</h3>
         <div id="listEstoque" class="dash-list"><p class="dash-empty">Nenhum item cadastrado.</p></div>
       </div>
+<div class="dash-panel">
+<h3>Novo fornecedor</h3>
+<form id="formFornecedor" class="dash-form-inline">
+<input type="text" id="forNome" placeholder="Nome do fornecedor" required>
+<input type="text" id="forTelefone" placeholder="Telefone">
+<input type="email" id="forEmail" placeholder="E-mail">
+<button type="submit" class="btn-dash-primary">Adicionar</button>
+</form>
+</div>
+<div class="dash-panel">
+<h3>Fornecedores</h3>
+<div id="listFornecedores" class="dash-list"><p class="dash-empty">Nenhum fornecedor cadastrado.</p></div>
+</div>
     </section>
     <section class="dash-view" id="view-comissoes">
       <div class="dash-cards">
@@ -223,6 +242,40 @@
         <div id="listComissoes" class="dash-list"><p class="dash-empty">Nenhuma comissao ainda.</p></div>
       </div>
     </section>
+
+<section class="dash-view" id="view-profissionais">
+<div class="dash-panel">
+<h3>Novo profissional</h3>
+<form id="formProfissional" class="dash-form-inline">
+<input type="text" id="prfNome" placeholder="Nome completo" required>
+<input type="text" id="prfEspecialidade" placeholder="Especialidade">
+<input type="text" id="prfTelefone" placeholder="Telefone">
+<input type="email" id="prfEmail" placeholder="E-mail">
+<button type="submit" class="btn-dash-primary">Adicionar</button>
+</form>
+</div>
+<div class="dash-panel">
+<h3>Profissionais</h3>
+<div id="listProfissionais" class="dash-list"><p class="dash-empty">Nenhum profissional cadastrado.</p></div>
+</div>
+</section>
+
+<section class="dash-view" id="view-procedimentos">
+<div class="dash-panel">
+<h3>Novo procedimento</h3>
+<form id="formProcedimento" class="dash-form-inline">
+<input type="text" id="prcNome" placeholder="Nome do procedimento" required>
+<input type="text" id="prcCategoria" placeholder="Categoria">
+<input type="number" id="prcPreco" placeholder="Preco (R$)" step="0.01" min="0">
+<input type="number" id="prcDuracao" placeholder="Duracao (minutos)">
+<button type="submit" class="btn-dash-primary">Adicionar</button>
+</form>
+</div>
+<div class="dash-panel">
+<h3>Procedimentos</h3>
+<div id="listProcedimentos" class="dash-list"><p class="dash-empty">Nenhum procedimento cadastrado.</p></div>
+</div>
+</section>
 
     <section class="dash-view" id="view-config">
       <div class="dash-panel">
