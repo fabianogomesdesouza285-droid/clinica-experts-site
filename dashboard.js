@@ -35,6 +35,9 @@ async function init() {
       await loadAtendimentos();
   await loadVendas();
   await loadComissoes();
+  await loadProfissionais();
+await loadProcedimentos();
+await loadFornecedores();
 }
 
 async function loadPacientes() {
@@ -349,10 +352,151 @@ document.getElementById('formComissao').addEventListener('submit', async functio
     loadComissoes();
 });
 
+async function loadProfissionais() {
+var res = await sbAuth.from('profissionais').select('*').eq('user_id', currentUserId).order('nome', { ascending: true });
+var list = res.data || [];
+var container = document.getElementById('listProfissionais');
+if (list.length === 0) { container.innerHTML = '<p class="dash-empty">Nenhum profissional cadastrado.</p>'; return; }
+container.innerHTML = '';
+list.forEach(function (p) {
+var row = document.createElement('div');
+row.className = 'dash-row';
+var info = document.createElement('div');
+info.className = 'dash-row-info';
+var title = document.createElement('span');
+title.className = 'dash-row-title';
+title.textContent = p.nome;
+var sub = document.createElement('span');
+sub.className = 'dash-row-sub';
+var subParts = [];
+if (p.especialidade) subParts.push(p.especialidade);
+if (p.telefone) subParts.push(p.telefone);
+if (p.email) subParts.push(p.email);
+sub.textContent = subParts.join(' - ');
+info.appendChild(title);
+info.appendChild(sub);
+var btn = document.createElement('button');
+btn.className = 'dash-del-btn';
+btn.textContent = 'Remover';
+btn.addEventListener('click', async function () {
+await sbAuth.from('profissionais').delete().eq('id', p.id);
+loadProfissionais();
+});
+row.appendChild(info);
+row.appendChild(btn);
+container.appendChild(row);
+});
+}
+
+async function loadProcedimentos() {
+var res = await sbAuth.from('procedimentos').select('*').eq('user_id', currentUserId).order('nome', { ascending: true });
+var list = res.data || [];
+var container = document.getElementById('listProcedimentos');
+if (list.length === 0) { container.innerHTML = '<p class="dash-empty">Nenhum procedimento cadastrado.</p>'; return; }
+container.innerHTML = '';
+list.forEach(function (p) {
+var row = document.createElement('div');
+row.className = 'dash-row';
+var info = document.createElement('div');
+info.className = 'dash-row-info';
+var title = document.createElement('span');
+title.className = 'dash-row-title';
+title.textContent = p.nome + (p.preco ? ' - ' + fmtMoney(p.preco) : '');
+var sub = document.createElement('span');
+sub.className = 'dash-row-sub';
+var subParts = [];
+if (p.categoria) subParts.push(p.categoria);
+if (p.duracao_minutos) subParts.push(p.duracao_minutos + ' min');
+sub.textContent = subParts.join(' - ');
+info.appendChild(title);
+info.appendChild(sub);
+var btn = document.createElement('button');
+btn.className = 'dash-del-btn';
+btn.textContent = 'Remover';
+btn.addEventListener('click', async function () {
+await sbAuth.from('procedimentos').delete().eq('id', p.id);
+loadProcedimentos();
+});
+row.appendChild(info);
+row.appendChild(btn);
+container.appendChild(row);
+});
+}
+
+async function loadFornecedores() {
+var res = await sbAuth.from('fornecedores').select('*').eq('user_id', currentUserId).order('nome', { ascending: true });
+var list = res.data || [];
+var container = document.getElementById('listFornecedores');
+if (list.length === 0) { container.innerHTML = '<p class="dash-empty">Nenhum fornecedor cadastrado.</p>'; return; }
+container.innerHTML = '';
+list.forEach(function (f) {
+var row = document.createElement('div');
+row.className = 'dash-row';
+var info = document.createElement('div');
+info.className = 'dash-row-info';
+var title = document.createElement('span');
+title.className = 'dash-row-title';
+title.textContent = f.nome;
+var sub = document.createElement('span');
+sub.className = 'dash-row-sub';
+var subParts = [];
+if (f.telefone) subParts.push(f.telefone);
+if (f.email) subParts.push(f.email);
+sub.textContent = subParts.join(' - ');
+info.appendChild(title);
+info.appendChild(sub);
+var btn = document.createElement('button');
+btn.className = 'dash-del-btn';
+btn.textContent = 'Remover';
+btn.addEventListener('click', async function () {
+await sbAuth.from('fornecedores').delete().eq('id', f.id);
+loadFornecedores();
+});
+row.appendChild(info);
+row.appendChild(btn);
+container.appendChild(row);
+});
+}
+
+document.getElementById('formProfissional').addEventListener('submit', async function (e) {
+e.preventDefault();
+var nome = document.getElementById('prfNome').value.trim();
+var especialidade = document.getElementById('prfEspecialidade').value.trim();
+var telefone = document.getElementById('prfTelefone').value.trim();
+var email = document.getElementById('prfEmail').value.trim();
+if (!nome) return;
+await sbAuth.from('profissionais').insert([{ user_id: currentUserId, nome: nome, especialidade: especialidade || null, telefone: telefone || null, email: email || null }]);
+e.target.reset();
+loadProfissionais();
+});
+
+document.getElementById('formProcedimento').addEventListener('submit', async function (e) {
+e.preventDefault();
+var nome = document.getElementById('prcNome').value.trim();
+var categoria = document.getElementById('prcCategoria').value.trim();
+var precoRaw = document.getElementById('prcPreco').value;
+var duracaoRaw = document.getElementById('prcDuracao').value;
+if (!nome) return;
+await sbAuth.from('procedimentos').insert([{ user_id: currentUserId, nome: nome, categoria: categoria || null, preco: precoRaw ? parseFloat(precoRaw) : 0, duracao_minutos: duracaoRaw ? parseInt(duracaoRaw, 10) : null }]);
+e.target.reset();
+loadProcedimentos();
+});
+
+document.getElementById('formFornecedor').addEventListener('submit', async function (e) {
+e.preventDefault();
+var nome = document.getElementById('forNome').value.trim();
+var telefone = document.getElementById('forTelefone').value.trim();
+var email = document.getElementById('forEmail').value.trim();
+if (!nome) return;
+await sbAuth.from('fornecedores').insert([{ user_id: currentUserId, nome: nome, telefone: telefone || null, email: email || null }]);
+e.target.reset();
+loadFornecedores();
+});
+
 var navItems = document.querySelectorAll('.dash-nav-item');
 var views = document.querySelectorAll('.dash-view');
 var viewTitleEl = document.getElementById('viewTitle');
-var viewTitles = { inicio: 'Inicio', agenda: 'Agenda', pacientes: 'Pacientes', atendimentos: 'Atendimentos', vendas: 'Vendas', financeiro: 'Financeiro', estoque: 'Estoque', config: 'Configuracoes' , comissoes: 'Comissoes'};
+var viewTitles = { inicio: 'Inicio', agenda: 'Agenda', pacientes: 'Pacientes', atendimentos: 'Atendimentos', vendas: 'Vendas', financeiro: 'Financeiro', estoque: 'Estoque', config: 'Configuracoes' , comissoes: 'Comissoes', profissionais: 'Profissionais', procedimentos: 'Procedimentos'};
 
 navItems.forEach(function (btn) {
   btn.addEventListener('click', function () {
