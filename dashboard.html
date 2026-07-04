@@ -125,9 +125,9 @@
             <h3>Novo atendimento</h3>
             <form id="formAtendimento" class="dash-form-inline">
                     <select id="atdPaciente"><option value="">Sem paciente vinculado</option></select>
-                    <input type="text" id="atdProfissional" placeholder="Profissional">
-                    <input type="text" id="atdProcedimento" placeholder="Procedimento" required>
-                    <input type="datetime-local" id="atdData" required>
+                    <select id="atdProfissional"><option value="">Sem profissional</option></select>
+<select id="atdProcedimento" required><option value="">Selecione um procedimento</option></select>
+<input type="datetime-local" id="atdData" required>
                     <select id="atdStatus">
                               <option value="em_andamento">Em andamento</option>
                               <option value="concluido">Concluido</option>
@@ -231,8 +231,8 @@
       <div class="dash-panel">
         <h3>Nova comissao</h3>
         <form id="formComissao" class="dash-form-inline">
-        <input type="text" id="comProfissional" placeholder="Profissional">
-        <input type="text" id="comDescricao" placeholder="Descricao (ex: venda pacote X)" required>
+        <select id="comProfissional"><option value="">Sem profissional</option></select>
+<input type="text" id="comDescricao" placeholder="Descricao (ex: venda pacote X)" required>
         <input type="number" id="comValorBase" placeholder="Valor base (R$)" step="0.01" min="0">
         <input type="number" id="comPercentual" placeholder="Percentual (%)" step="0.01" min="0">
         <input type="number" id="comValorComissao" placeholder="Valor da comissao (R$)" step="0.01" min="0" required>
