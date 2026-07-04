@@ -24,6 +24,9 @@
       <button class="dash-nav-item" data-view="pacientes">
         <span class="dash-nav-icon">PAC</span> Pacientes
       </button>
+<button class="dash-nav-item" data-view="atendimentos">
+          <span class="dash-nav-icon">ATD</span> Atendimentos
+        </button>
       <button class="dash-nav-item" data-view="financeiro">
         <span class="dash-nav-icon">FIN</span> Financeiro
       </button>
@@ -98,6 +101,27 @@
         <div id="listPacientes" class="dash-list"><p class="dash-empty">Nenhum paciente cadastrado.</p></div>
       </div>
     </section>
+  <section class="dash-view" id="view-atendimentos">
+      <div class="dash-panel">
+            <h3>Novo atendimento</h3>
+            <form id="formAtendimento" class="dash-form-inline">
+                    <select id="atdPaciente"><option value="">Sem paciente vinculado</option></select>
+                    <input type="text" id="atdProfissional" placeholder="Profissional">
+                    <input type="text" id="atdProcedimento" placeholder="Procedimento" required>
+                    <input type="datetime-local" id="atdData" required>
+                    <select id="atdStatus">
+                              <option value="em_andamento">Em andamento</option>
+                              <option value="concluido">Concluido</option>
+                              <option value="cancelado">Cancelado</option>
+                    </select>
+                    <button type="submit" class="btn-dash-primary">Adicionar</button>
+            </form>
+      </div>
+      <div class="dash-panel">
+            <h3>Atendimentos</h3>
+                <div id="listAtendimentos" class="dash-list"><p class="dash-empty">Nenhum atendimento ainda.</p></div>
+      </div>
+  </section>
 
     <section class="dash-view" id="view-financeiro">
       <div class="dash-cards">
