@@ -47,6 +47,7 @@ document.getElementById('assEmail').textContent = user.email;
   await loadProfissionais();
 await loadProcedimentos();
 await loadFornecedores();
+    await loadSalas();
   await loadLeads();
 document.getElementById('aniMes').value = String(new Date().getMonth() + 1);
     await loadAniversariantes();
@@ -492,6 +493,50 @@ row.appendChild(info);
 row.appendChild(btn);
 container.appendChild(row);
 });
+}
+
+document.getElementById('formSala').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var nome = document.getElementById('salaNome').value.trim();
+    var capacidadeRaw = document.getElementById('salaCapacidade').value;
+    if (!nome) return;
+    await sbAuth.from('salas').insert([{ user_id: currentUserId, nome: nome, capacidade: capacidadeRaw ? parseInt(capacidadeRaw, 10) : null }]);
+    e.target.reset();
+    loadSalas();
+});
+
+async function loadSalas() {
+    var res = await sbAuth.from('salas').select('*').eq('user_id', currentUserId).order('nome', { ascending: true });
+    var list = res.data || [];
+    var container = document.getElementById('listSalas');
+    if (list.length === 0) { container.innerHTML = '<p class="dash-empty">Nenhuma sala cadastrada.</p>'; return; }
+    container.innerHTML = '';
+    list.forEach(function (s) {
+          var row = document.createElement('div');
+          row.className = 'dash-row';
+          var info = document.createElement('div');
+          info.className = 'dash-row-info';
+          var title = document.createElement('span');
+          title.className = 'dash-row-title';
+          title.textContent = s.nome;
+          info.appendChild(title);
+          if (s.capacidade) {
+                  var sub = document.createElement('span');
+                  sub.className = 'dash-row-sub';
+                  sub.textContent = 'Capacidade: ' + s.capacidade;
+                  info.appendChild(sub);
+          }
+          var btn = document.createElement('button');
+          btn.className = 'dash-del-btn';
+          btn.textContent = 'Remover';
+          btn.addEventListener('click', async function () {
+                  await sbAuth.from('salas').delete().eq('id', s.id);
+                  loadSalas();
+          });
+          row.appendChild(info);
+          row.appendChild(btn);
+          container.appendChild(row);
+    });
 }
 
 async function loadProcedimentos() {
