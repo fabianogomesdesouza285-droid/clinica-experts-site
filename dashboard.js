@@ -42,6 +42,7 @@ document.getElementById('assEmail').textContent = user.email;
   await loadProfissionais();
 await loadProcedimentos();
 await loadFornecedores();
+  await loadLeads();
 }
 
 async function loadPacientes() {
@@ -513,10 +514,73 @@ e.target.reset();
 loadFornecedores();
 });
 
+async function loadLeads() {
+var res = await sbAuth.from('leads_crm').select('*').eq('user_id', currentUserId).order('criado_em', { ascending: false });
+var list = res.data || [];
+var container = document.getElementById('listLeads');
+if (list.length === 0) { container.innerHTML = '<p class="dash-empty">Nenhum lead cadastrado.</p>'; return; }
+container.innerHTML = '';
+list.forEach(function (l) {
+var row = document.createElement('div');
+row.className = 'dash-row';
+var info = document.createElement('div');
+info.className = 'dash-row-info';
+var title = document.createElement('span');
+title.className = 'dash-row-title';
+title.textContent = l.nome;
+var sub = document.createElement('span');
+sub.className = 'dash-row-sub';
+var subParts = [];
+if (l.telefone) subParts.push(l.telefone);
+if (l.email) subParts.push(l.email);
+if (l.origem) subParts.push(l.origem);
+var statusLabel = l.status === 'convertido' ? 'Convertido' : (l.status === 'perdido' ? 'Perdido' : (l.status === 'em_contato' ? 'Em contato' : 'Novo'));
+subParts.push(statusLabel);
+sub.textContent = subParts.join(' - ');
+info.appendChild(title);
+info.appendChild(sub);
+row.appendChild(info);
+if (l.status !== 'convertido') {
+var convBtn = document.createElement('button');
+convBtn.className = 'btn-dash-primary';
+convBtn.textContent = 'Converter em paciente';
+convBtn.addEventListener('click', async function () {
+await sbAuth.from('pacientes').insert([{ user_id: currentUserId, nome: l.nome, whatsapp: l.telefone || null, email: l.email || null }]);
+await sbAuth.from('leads_crm').update({ status: 'convertido' }).eq('id', l.id);
+loadLeads();
+loadPacientes();
+});
+row.appendChild(convBtn);
+}
+var btn = document.createElement('button');
+btn.className = 'dash-del-btn';
+btn.textContent = 'Remover';
+btn.addEventListener('click', async function () {
+await sbAuth.from('leads_crm').delete().eq('id', l.id);
+loadLeads();
+});
+row.appendChild(btn);
+container.appendChild(row);
+});
+}
+
+document.getElementById('formLead').addEventListener('submit', async function (e) {
+e.preventDefault();
+var nome = document.getElementById('ledNome').value.trim();
+var telefone = document.getElementById('ledTelefone').value.trim();
+var email = document.getElementById('ledEmail').value.trim();
+var origem = document.getElementById('ledOrigem').value.trim();
+var status = document.getElementById('ledStatus').value;
+if (!nome) return;
+await sbAuth.from('leads_crm').insert([{ user_id: currentUserId, nome: nome, telefone: telefone || null, email: email || null, origem: origem || null, status: status }]);
+e.target.reset();
+loadLeads();
+});
+
 var navItems = document.querySelectorAll('.dash-nav-item');
 var views = document.querySelectorAll('.dash-view');
 var viewTitleEl = document.getElementById('viewTitle');
-var viewTitles = { inicio: 'Inicio', agenda: 'Agenda', pacientes: 'Pacientes', atendimentos: 'Atendimentos', vendas: 'Vendas', financeiro: 'Financeiro', estoque: 'Estoque', config: 'Configuracoes' , comissoes: 'Comissoes', profissionais: 'Profissionais', procedimentos: 'Procedimentos', assinatura: 'Assinatura'};
+var viewTitles = { inicio: 'Inicio', agenda: 'Agenda', pacientes: 'Pacientes', atendimentos: 'Atendimentos', vendas: 'Vendas', financeiro: 'Financeiro', estoque: 'Estoque', config: 'Configuracoes' , comissoes: 'Comissoes', profissionais: 'Profissionais', procedimentos: 'Procedimentos', assinatura: 'Assinatura', leads: 'Leads'};
 
 navItems.forEach(function (btn) {
   btn.addEventListener('click', function () {
