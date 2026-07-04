@@ -31,6 +31,7 @@ async function init() {
   await loadAgenda();
   await loadFinanceiro();
   await loadEstoque();
+      await loadAtendimentos();
 }
 
 async function loadPacientes() {
@@ -45,6 +46,7 @@ async function loadPacientes() {
     opt.textContent = p.nome;
     select.appendChild(opt);
   });
+      var selectAtd = document.getElementById('atdPaciente'); selectAtd.innerHTML = '<option value="">Sem paciente vinculado</option>'; list.forEach(function (p) { var opt2 = document.createElement('option'); opt2.value = p.id; opt2.textContent = p.nome; selectAtd.appendChild(opt2); });
   var container = document.getElementById('listPacientes');
   if (list.length === 0) {
     container.innerHTML = '<p class=\"dash-empty\">Nenhum paciente cadastrado.</p>';
@@ -80,6 +82,8 @@ async function loadPacientes() {
     container.appendChild(row);
   });
 }
+
+  async function loadAtendimentos() { var res = await sbAuth.from('atendimentos').select('*, pacientes(nome)').eq('user_id', currentUserId).order('data_atendimento', { ascending: false }); var list = res.data || []; var container = document.getElementById('listAtendimentos'); if (list.length === 0) { container.innerHTML = '<p class="dash-empty">Nenhum atendimento ainda.</p>'; return; } container.innerHTML = ''; list.forEach(function (a) { var row = document.createElement('div'); row.className = 'dash-row'; var info = document.createElement('div'); info.className = 'dash-row-info'; var title = document.createElement('span'); title.className = 'dash-row-title'; var pacienteNome = a.pacientes && a.pacientes.nome ? a.pacientes.nome : 'Sem paciente'; title.textContent = a.procedimento + ' - ' + pacienteNome; var sub = document.createElement('span'); sub.className = 'dash-row-sub'; var dt = new Date(a.data_atendimento); var statusLabel = a.status === 'concluido' ? 'Concluido' : (a.status === 'cancelado' ? 'Cancelado' : 'Em andamento'); sub.textContent = dt.toLocaleString('pt-BR') + (a.profissional ? ' - ' + a.profissional : '') + ' - ' + statusLabel; info.appendChild(title); info.appendChild(sub); var btn = document.createElement('button'); btn.className = 'dash-del-btn'; btn.textContent = 'Remover'; btn.addEventListener('click', async function () { await sbAuth.from('atendimentos').delete().eq('id', a.id); loadAtendimentos(); }); row.appendChild(info); row.appendChild(btn); container.appendChild(row); }); }
 
 function renderAgendaList(container, list) {
   if (!list || list.length === 0) {
@@ -233,6 +237,8 @@ document.getElementById('formPaciente').addEventListener('submit', async functio
   loadPacientes();
 });
 
+document.getElementById('formAtendimento').addEventListener('submit', async function (e) { e.preventDefault(); var pacienteId = document.getElementById('atdPaciente').value || null; var profissional = document.getElementById('atdProfissional').value.trim(); var procedimento = document.getElementById('atdProcedimento').value.trim(); var dataStr = document.getElementById('atdData').value; var status = document.getElementById('atdStatus').value; if (!procedimento || !dataStr) return; await sbAuth.from('atendimentos').insert([{ user_id: currentUserId, paciente_id: pacienteId, profissional: profissional || null, procedimento: procedimento, status: status, data_atendimento: new Date(dataStr).toISOString() }]); e.target.reset(); loadAtendimentos(); });
+
 document.getElementById('formAgenda').addEventListener('submit', async function (e) {
   e.preventDefault();
   var titulo = document.getElementById('agTitulo').value.trim();
@@ -271,7 +277,7 @@ document.getElementById('formEstoque').addEventListener('submit', async function
 var navItems = document.querySelectorAll('.dash-nav-item');
 var views = document.querySelectorAll('.dash-view');
 var viewTitleEl = document.getElementById('viewTitle');
-var viewTitles = { inicio: 'Inicio', agenda: 'Agenda', pacientes: 'Pacientes', financeiro: 'Financeiro', estoque: 'Estoque', config: 'Configuracoes' };
+var viewTitles = { inicio: 'Inicio', agenda: 'Agenda', pacientes: 'Pacientes', atendimentos: 'Atendimentos', financeiro: 'Financeiro', estoque: 'Estoque', config: 'Configuracoes' };
 
 navItems.forEach(function (btn) {
   btn.addEventListener('click', function () {
