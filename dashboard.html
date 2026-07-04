@@ -229,6 +229,8 @@
         <div class="dash-card"><span class="dash-card-label">Entradas</span><span class="dash-card-value dash-green" id="finEntradas">R$ 0,00</span></div>
         <div class="dash-card"><span class="dash-card-label">Saidas</span><span class="dash-card-value dash-red" id="finSaidas">R$ 0,00</span></div>
         <div class="dash-card"><span class="dash-card-label">Saldo</span><span class="dash-card-value" id="finSaldo">R$ 0,00</span></div>
+        <div class="dash-card"><span class="dash-card-label">A receber</span><span class="dash-card-value dash-green" id="finAReceber">R$ 0,00</span></div>
+        <div class="dash-card"><span class="dash-card-label">A pagar</span><span class="dash-card-value dash-red" id="finAPagar">R$ 0,00</span></div>
       </div>
       <div class="dash-panel">
         <h3>Novo lancamento</h3>
@@ -240,6 +242,11 @@
           <input type="text" id="finDescricao" placeholder="Descricao" required>
           <input type="number" id="finValor" placeholder="Valor (R$)" step="0.01" required>
           <input type="date" id="finData" required>
+        <select id="finStatus">
+          <option value="pago">Pago</option>
+          <option value="pendente">Pendente</option>
+        </select>
+        <input type="date" id="finVencimento" placeholder="Vencimento">
           <button type="submit" class="btn-dash-primary">Adicionar</button>
         </form>
       </div>
