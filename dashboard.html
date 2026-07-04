@@ -27,6 +27,9 @@
 <button class="dash-nav-item" data-view="atendimentos">
           <span class="dash-nav-icon">ATD</span> Atendimentos
         </button>
+      <button class="dash-nav-item" data-view="vendas">
+        <span class="dash-nav-icon">VND</span> Vendas
+      </button>
       <button class="dash-nav-item" data-view="financeiro">
         <span class="dash-nav-icon">FIN</span> Financeiro
       </button>
@@ -122,7 +125,33 @@
                 <div id="listAtendimentos" class="dash-list"><p class="dash-empty">Nenhum atendimento ainda.</p></div>
       </div>
   </section>
-
+    <section class="dash-view" id="view-vendas">
+      <div class="dash-panel">
+        <h3>Nova venda</h3>
+  <form id="formVenda" class="dash-form-inline">
+    <select id="vndPaciente"><option value="">Sem paciente vinculado</option></select>
+    <input type="text" id="vndDescricao" placeholder="Descricao / produto ou servico" required>
+    <input type="number" id="vndValor" placeholder="Valor (R$)" step="0.01" min="0" required>
+    <select id="vndFormaPagamento">
+      <option value="dinheiro">Dinheiro</option>
+      <option value="cartao">Cartao</option>
+      <option value="pix">Pix</option>
+      <option value="outro">Outro</option>
+    </select>
+    <select id="vndStatus">
+      <option value="pago">Pago</option>
+      <option value="pendente">Pendente</option>
+      <option value="cancelado">Cancelado</option>
+    </select>
+    <input type="date" id="vndData" required>
+    <button type="submit" class="btn-dash-primary">Adicionar</button>
+  </form>
+      </div>
+      <div class="dash-panel">
+        <h3>Vendas</h3>
+        <div id="listVendas" class="dash-list"><p class="dash-empty">Nenhuma venda ainda.</p></div>
+      </div>
+    </section>
     <section class="dash-view" id="view-financeiro">
       <div class="dash-cards">
         <div class="dash-card"><span class="dash-card-label">Entradas</span><span class="dash-card-value dash-green" id="finEntradas">R$ 0,00</span></div>
