@@ -36,6 +36,9 @@
       <button class="dash-nav-item" data-view="estoque">
         <span class="dash-nav-icon">EST</span> Estoque
       </button>
+      <button class="dash-nav-item" data-view="comissoes">
+        <span class="dash-nav-icon">COM</span> Comissoes
+      </button>
       <button class="dash-nav-item" data-view="config">
         <span class="dash-nav-icon">CFG</span> Configuracoes
       </button>
@@ -195,6 +198,29 @@
       <div class="dash-panel">
         <h3>Itens em estoque</h3>
         <div id="listEstoque" class="dash-list"><p class="dash-empty">Nenhum item cadastrado.</p></div>
+      </div>
+    </section>
+    <section class="dash-view" id="view-comissoes">
+      <div class="dash-cards">
+        <div class="dash-card"><span class="dash-card-label">Comissoes em aberto</span><span class="dash-card-value dash-red" id="comAberto">R$ 0,00</span></div>
+        <div class="dash-card"><span class="dash-card-label">Comissoes pagas</span><span class="dash-card-value dash-green" id="comPagas">R$ 0,00</span></div>
+        <div class="dash-card"><span class="dash-card-label">Total</span><span class="dash-card-value" id="comTotal">R$ 0,00</span></div>
+      </div>
+      <div class="dash-panel">
+        <h3>Nova comissao</h3>
+        <form id="formComissao" class="dash-form-inline">
+        <input type="text" id="comProfissional" placeholder="Profissional">
+        <input type="text" id="comDescricao" placeholder="Descricao (ex: venda pacote X)" required>
+        <input type="number" id="comValorBase" placeholder="Valor base (R$)" step="0.01" min="0">
+        <input type="number" id="comPercentual" placeholder="Percentual (%)" step="0.01" min="0">
+        <input type="number" id="comValorComissao" placeholder="Valor da comissao (R$)" step="0.01" min="0" required>
+        <input type="date" id="comData" required>
+        <button type="submit" class="btn-dash-primary">Adicionar</button>
+        </form>
+      </div>
+      <div class="dash-panel">
+        <h3>Comissoes</h3>
+        <div id="listComissoes" class="dash-list"><p class="dash-empty">Nenhuma comissao ainda.</p></div>
       </div>
     </section>
 
