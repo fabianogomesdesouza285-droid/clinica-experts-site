@@ -31,6 +31,11 @@ document.getElementById('assPlano').textContent = perfil ? perfil.plano : '-';
 document.getElementById('assClinica').textContent = perfil ? perfil.nome_clinica : '-';
 document.getElementById('assEmail').textContent = user.email;
     document.getElementById('cfgNomeInput').value = perfil ? perfil.nome_clinica : '';
+  var hfInit = perfil && perfil.horario_funcionamento ? perfil.horario_funcionamento : { dias: [1,2,3,4,5], abertura: '08:00', fechamento: '18:00' };
+  document.querySelectorAll('.cfgDia').forEach(function (cb) { cb.checked = hfInit.dias.indexOf(Number(cb.value)) > -1; });
+  document.getElementById('cfgAbertura').value = hfInit.abertura;
+  document.getElementById('cfgFechamento').value = hfInit.fechamento;
+  renderHorarioResumo(hfInit);
 
   await loadPacientes();
   await loadAgenda();
@@ -362,6 +367,26 @@ document.getElementById('formConfig').addEventListener('submit', async function 
   document.getElementById('cfgClinica').textContent = novoNome;
   document.getElementById('assClinica').textContent = novoNome;
 });
+
+document.getElementById('formHorario').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var dias = Array.prototype.slice.call(document.querySelectorAll('.cfgDia')).filter(function (cb) { return cb.checked; }).map(function (cb) { return Number(cb.value); });
+    var abertura = document.getElementById('cfgAbertura').value || '08:00';
+    var fechamento = document.getElementById('cfgFechamento').value || '18:00';
+    var hf = { dias: dias, abertura: abertura, fechamento: fechamento };
+    await sbAuth.from('perfis').update({ horario_funcionamento: hf }).eq('id', currentUserId);
+    renderHorarioResumo(hf);
+});
+
+function renderHorarioResumo(hf) {
+    var el = document.getElementById('cfgHorarioResumo');
+    if (!el) return;
+    if (!hf || !hf.dias || !hf.dias.length) { el.textContent = 'Nenhum horario configurado.'; return; }
+    var nomes = { 0: 'Dom', 1: 'Seg', 2: 'Ter', 3: 'Qua', 4: 'Qui', 5: 'Sex', 6: 'Sab' };
+    var ordem = [1, 2, 3, 4, 5, 6, 0];
+    var diasTxt = ordem.filter(function (d) { return hf.dias.indexOf(d) > -1; }).map(function (d) { return nomes[d]; }).join(', ');
+    el.textContent = diasTxt + ' - ' + hf.abertura + ' as ' + hf.fechamento;
+}
 
 async function loadComissoes() {
     var res = await sbAuth.from('comissoes').select('*').eq('user_id', currentUserId).order('data_referencia', { ascending: false });
