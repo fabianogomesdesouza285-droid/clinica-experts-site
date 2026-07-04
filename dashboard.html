@@ -107,21 +107,53 @@
       </div>
     </section>
 
-    <section class="dash-view" id="view-agenda">
-      <div class="dash-panel">
-        <h3>Novo agendamento</h3>
-        <form id="formAgenda" class="dash-form-inline">
-          <input type="text" id="agTitulo" placeholder="Titulo (ex: Limpeza de pele)" required>
-          <select id="agPaciente"><option value="">Sem paciente vinculado</option></select>
-          <input type="datetime-local" id="agData" required>
-          <button type="submit" class="btn-dash-primary">Adicionar</button>
-        </form>
-      </div>
-      <div class="dash-panel">
-        <h3>Agendamentos</h3>
-        <div id="listAgenda" class="dash-list"><p class="dash-empty">Nenhum agendamento ainda.</p></div>
-      </div>
-    </section>
+<section class="dash-view" id="view-agenda">
+        <div class="dash-panel">
+          <h3>Novo agendamento</h3>
+          <form id="formAgenda" class="dash-form-inline">
+            <input type="text" id="agTitulo" placeholder="Titulo (ex: Limpeza de pele)" required>
+            <select id="agPaciente"><option value="">Sem paciente vinculado</option></select>
+            <input type="datetime-local" id="agData" required>
+            <button type="submit" class="btn-dash-primary">Adicionar</button>
+          </form>
+        </div>
+  
+        <div class="dash-panel">
+          <h3>Bloquear horario / feriado</h3>
+          <form id="formBloqueio" class="dash-form-inline">
+            <input type="text" id="blTitulo" placeholder="Motivo (ex: Feriado, Almoco)" required>
+            <input type="datetime-local" id="blInicio" required>
+            <input type="datetime-local" id="blFim" required>
+            <button type="submit" class="btn-dash-secondary">Bloquear</button>
+          </form>
+        </div>
+  
+        <div class="dash-panel">
+          <div class="dash-agenda-toolbar">
+            <div class="dash-agenda-nav">
+              <button type="button" id="agPrev" class="dash-agenda-nav-btn">‹</button>
+              <button type="button" id="agHoje" class="dash-agenda-hoje-btn">Hoje</button>
+              <button type="button" id="agNext" class="dash-agenda-nav-btn">›</button>
+              <span id="agRangeLabel" class="dash-agenda-range"></span>
+            </div>
+            <div class="dash-agenda-views">
+              <button type="button" class="dash-agenda-view-btn" data-agview="dia">Dia</button>
+              <button type="button" class="dash-agenda-view-btn active" data-agview="semana">Semana</button>
+              <button type="button" class="dash-agenda-view-btn" data-agview="mes">Mes</button>
+            </div>
+            <div class="dash-agenda-stats">
+              <span id="agOcupacao">Ocupacao: --</span>
+              <span id="agTotalPeriodo">0 agendamentos</span>
+            </div>
+          </div>
+          <div id="agendaGrid" class="dash-agenda-grid"></div>
+        </div>
+  
+        <div class="dash-panel">
+          <h3>Todos os agendamentos</h3>
+          <div id="listAgenda" class="dash-list"><p class="dash-empty">Nenhum agendamento ainda.</p></div>
+        </div>
+      </section>
 
     <section class="dash-view" id="view-pacientes">
       <div class="dash-panel">
