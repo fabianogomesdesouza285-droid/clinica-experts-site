@@ -24,6 +24,9 @@
       <button class="dash-nav-item" data-view="pacientes">
         <span class="dash-nav-icon">PAC</span> Pacientes
       </button>
+        <button class="dash-nav-item" data-view="leads">
+          <span class="dash-nav-icon">LED</span> Leads
+        </button>
 <button class="dash-nav-item" data-view="atendimentos">
           <span class="dash-nav-icon">ATD</span> Atendimentos
         </button>
@@ -118,6 +121,29 @@
       <div class="dash-panel">
         <h3>Lista de pacientes</h3>
         <div id="listPacientes" class="dash-list"><p class="dash-empty">Nenhum paciente cadastrado.</p></div>
+      </div>
+    </section>
+
+    <section class="dash-view" id="view-leads">
+      <div class="dash-panel">
+        <h3>Novo lead</h3>
+        <form id="formLead" class="dash-form-inline">
+          <input type="text" id="ledNome" placeholder="Nome completo" required>
+          <input type="text" id="ledTelefone" placeholder="WhatsApp / Telefone">
+          <input type="email" id="ledEmail" placeholder="E-mail">
+          <input type="text" id="ledOrigem" placeholder="Origem (ex: Instagram, indicacao)">
+          <select id="ledStatus">
+            <option value="novo">Novo</option>
+            <option value="em_contato">Em contato</option>
+            <option value="convertido">Convertido</option>
+            <option value="perdido">Perdido</option>
+          </select>
+          <button type="submit" class="btn-dash-primary">Adicionar</button>
+        </form>
+      </div>
+      <div class="dash-panel">
+        <h3>Leads</h3>
+        <div id="listLeads" class="dash-list"><p class="dash-empty">Nenhum lead cadastrado.</p></div>
       </div>
     </section>
   <section class="dash-view" id="view-atendimentos">
