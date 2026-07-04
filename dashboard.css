@@ -266,3 +266,7 @@
 .dash-cal-month-event { background: var(--primary); color: #fff; border-radius: 3px; font-size: 10px; padding: 1px 3px; margin-top: 2px; overflow: hidden; white-space: nowrap; cursor: pointer; }
 .dash-cal-month-event.blocked { background: var(--gray-500); }
 .dash-cal-month-more { font-size: 10px; color: var(--gray-500); margin-top: 2px; }
+
+/* ===== Configuracoes - horario de funcionamento ===== */
+.dash-check { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--gray-700); background: var(--gray-100); padding: 6px 10px; border-radius: var(--radius-sm); cursor: pointer; }
+.dash-check input { width: auto; flex: none; }
