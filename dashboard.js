@@ -45,6 +45,43 @@ await loadFornecedores();
   await loadLeads();
 document.getElementById('aniMes').value = String(new Date().getMonth() + 1);
     await loadAniversariantes();
+  await loadAniversariantesHome();
+}
+
+async function loadAniversariantesHome() {
+  var res = await sbAuth.from("pacientes").select("*").eq("user_id", currentUserId);
+  var list = res.data || [];
+  var hoje = new Date(); hoje.setHours(0,0,0,0);
+  var comData = list.filter(function (p) { return p.data_nascimento; }).map(function (p) {
+    var d = new Date(p.data_nascimento + "T00:00:00");
+    var prox = new Date(hoje.getFullYear(), d.getMonth(), d.getDate());
+    if (prox < hoje) prox = new Date(hoje.getFullYear() + 1, d.getMonth(), d.getDate());
+    var dias = Math.round((prox - hoje) / 86400000);
+    return { p: p, prox: prox, dias: dias };
+  });
+  comData.sort(function (a, b) { return a.dias - b.dias; });
+  var proximos = comData.filter(function (x) { return x.dias <= 30; }).slice(0, 5);
+  var container = document.getElementById("listAniversariantesHome");
+  if (!container) return;
+  if (proximos.length === 0) { container.innerHTML = "<p class=\"dash-empty\">Nenhum aniversariante nos proximos dias.</p>"; return; }
+  container.innerHTML = "";
+  proximos.forEach(function (x) {
+    var row = document.createElement("div");
+    row.className = "dash-row";
+    var info = document.createElement("div");
+    info.className = "dash-row-info";
+    var title = document.createElement("span");
+    title.className = "dash-row-title";
+    title.textContent = x.p.nome;
+    var sub = document.createElement("span");
+    sub.className = "dash-row-sub";
+    var dLabel = x.dias === 0 ? "Hoje" : (x.dias === 1 ? "Amanha" : "Em " + x.dias + " dias");
+    sub.textContent = x.prox.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) + " - " + dLabel;
+    info.appendChild(title);
+    info.appendChild(sub);
+    row.appendChild(info);
+    container.appendChild(row);
+  });
 }
 
 async function loadPacientes() {
@@ -176,6 +213,8 @@ document.getElementById('finAPagar').textContent = fmtMoney(aPagar);
     }
   });
   document.getElementById('statSaldo').textContent = fmtMoney(mEntradas - mSaidas);
+var elEntradasMes = document.getElementById("statEntradasMes"); if (elEntradasMes) elEntradasMes.textContent = fmtMoney(mEntradas);
+var elSaidasMes = document.getElementById("statSaidasMes"); if (elSaidasMes) elSaidasMes.textContent = fmtMoney(mSaidas);
   var chartEl = document.getElementById('chartFluxoCaixa'); if (chartEl) { var months = []; var refDate = new Date(); for (var mi = 5; mi >= 0; mi--) { var dtM = new Date(refDate.getFullYear(), refDate.getMonth() - mi, 1); months.push({ key: dtM.getFullYear() + '-' + dtM.getMonth(), label: dtM.toLocaleDateString('pt-BR', { month: 'short' }), entrada: 0, saida: 0 }); } list.forEach(function (l) { var dL = new Date(l.data_lancamento); var key = dL.getFullYear() + '-' + dL.getMonth(); var mObj = months.find(function (m) { return m.key === key; }); if (mObj) { var vL = parseFloat(l.valor); if (l.tipo === 'entrada') mObj.entrada += vL; else mObj.saida += vL; } }); var maxVal = 1; months.forEach(function (m) { if (m.entrada > maxVal) maxVal = m.entrada; if (m.saida > maxVal) maxVal = m.saida; }); chartEl.innerHTML = ''; months.forEach(function (m) { var col = document.createElement('div'); col.className = 'dash-chart-month'; var bars = document.createElement('div'); bars.className = 'dash-chart-bars'; var barE = document.createElement('div'); barE.className = 'dash-chart-bar dash-chart-bar-entrada'; barE.style.height = Math.round((m.entrada / maxVal) * 150) + 'px'; barE.title = 'Entradas: ' + fmtMoney(m.entrada); var barS = document.createElement('div'); barS.className = 'dash-chart-bar dash-chart-bar-saida'; barS.style.height = Math.round((m.saida / maxVal) * 150) + 'px'; barS.title = 'Saidas: ' + fmtMoney(m.saida); bars.appendChild(barE); bars.appendChild(barS); var lbl = document.createElement('span'); lbl.className = 'dash-chart-label'; lbl.textContent = m.label; col.appendChild(bars); col.appendChild(lbl); chartEl.appendChild(col); }); }
 
   var container = document.getElementById('listFinanceiro');
