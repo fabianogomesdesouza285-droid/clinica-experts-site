@@ -30,6 +30,7 @@ async function init() {
 document.getElementById('assPlano').textContent = perfil ? perfil.plano : '-';
 document.getElementById('assClinica').textContent = perfil ? perfil.nome_clinica : '-';
 document.getElementById('assEmail').textContent = user.email;
+    document.getElementById('cfgNomeInput').value = perfil ? perfil.nome_clinica : '';
 
   await loadPacientes();
   await loadAgenda();
@@ -287,6 +288,15 @@ document.getElementById('formEstoque').addEventListener('submit', async function
   await sbAuth.from('estoque_itens').insert([{ user_id: currentUserId, nome: nome, quantidade: qtd, quantidade_minima: qtdMinRaw ? parseInt(qtdMinRaw, 10) : 0, preco: precoRaw ? parseFloat(precoRaw) : null }]);
   e.target.reset();
   loadEstoque();
+});
+
+document.getElementById('formConfig').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var novoNome = document.getElementById('cfgNomeInput').value.trim();
+  if (!novoNome) return;
+  await sbAuth.from('perfis').update({ nome_clinica: novoNome }).eq('id', currentUserId);
+  document.getElementById('cfgClinica').textContent = novoNome;
+  document.getElementById('assClinica').textContent = novoNome;
 });
 
 async function loadComissoes() {
