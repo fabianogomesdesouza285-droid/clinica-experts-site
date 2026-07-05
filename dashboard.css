@@ -270,3 +270,19 @@
 /* ===== Configuracoes - horario de funcionamento ===== */
 .dash-check { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--gray-700); background: var(--gray-100); padding: 6px 10px; border-radius: var(--radius-sm); cursor: pointer; }
 .dash-check input { width: auto; flex: none; }
+
+
+/* ===== Agenda - modal de detalhes/edicao e filtros ===== */
+.dash-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(16,24,40,0.55); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
+.dash-modal-overlay.open { display: flex; }
+.dash-modal-box { background: #fff; border-radius: 12px; padding: 24px; max-width: 480px; width: 100%; max-height: 88vh; overflow-y: auto; position: relative; box-shadow: 0 20px 60px rgba(16,24,40,0.3); }
+.dash-modal-box h3 { margin: 0 0 16px; }
+.dash-modal-close { position: absolute; top: 12px; right: 14px; background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: #667085; }
+.dash-modal-close:hover { color: #1d2939; }
+.dash-modal-box label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 4px; color: #344054; }
+.dash-modal-box input, .dash-modal-box select, .dash-modal-box textarea { width: 100%; padding: 10px 12px; border: 1px solid #d0d5dd; border-radius: 8px; font-size: 14px; font-family: inherit; }
+.dash-modal-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+.dash-modal-confirm { display: none; margin-top: 16px; padding: 14px; border-radius: 8px; background: #fef3f2; border: 1px solid #fda29b; }
+.dash-modal-confirm.open { display: block; }
+.dash-modal-confirm p { margin: 0 0 10px; font-size: 14px; color: #7a271a; }
+.dash-cal-event, .dash-cal-month-event { cursor: pointer; }
