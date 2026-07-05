@@ -10,406 +10,389 @@
 </head>
 <body class="dash-body">
 
-  <aside class="dash-sidebar" id="sidebar">
-    <div class="dash-logo-wrap">
-      <img src="logo.png" alt="VigoreFlow" class="logo-img">
-    </div>
-    <nav class="dash-nav">
-      <button class="dash-nav-item active" data-view="inicio">
-        <span class="dash-nav-icon">HOME</span> Inicio
-      </button>
-      <button class="dash-nav-item" data-view="agenda">
-        <span class="dash-nav-icon">AGD</span> Agenda
-      </button>
-      <button class="dash-nav-item" data-view="pacientes">
-        <span class="dash-nav-icon">PAC</span> Pacientes
-      </button>
-        <button class="dash-nav-item" data-view="leads">
-          <span class="dash-nav-icon">LED</span> Leads
-        </button>
-          <button class="dash-nav-item" data-view="aniversariantes">
-            <span class="dash-nav-icon">BDAY</span> Aniversariantes
-          </button>
+<aside class="dash-sidebar" id="sidebar">
+<div class="dash-logo-wrap">
+<img src="logo.png" alt="VigoreFlow" class="logo-img">
+</div>
+<nav class="dash-nav">
+<button class="dash-nav-item active" data-view="inicio">
+<span class="dash-nav-icon">HOME</span> Inicio
+</button>
+<button class="dash-nav-item" data-view="agenda">
+<span class="dash-nav-icon">AGD</span> Agenda
+</button>
+<button class="dash-nav-item" data-view="pacientes">
+<span class="dash-nav-icon">PAC</span> Pacientes
+</button>
+<button class="dash-nav-item" data-view="leads">
+<span class="dash-nav-icon">LED</span> Leads
+</button>
+<button class="dash-nav-item" data-view="aniversariantes">
+<span class="dash-nav-icon">BDAY</span> Aniversariantes
+</button>
 <button class="dash-nav-item" data-view="atendimentos">
-          <span class="dash-nav-icon">ATD</span> Atendimentos
-        </button>
-      <button class="dash-nav-item" data-view="vendas">
-        <span class="dash-nav-icon">VND</span> Vendas
-      </button>
-      <button class="dash-nav-item" data-view="financeiro">
-        <span class="dash-nav-icon">FIN</span> Financeiro
-      </button>
-      <button class="dash-nav-item" data-view="estoque">
-        <span class="dash-nav-icon">EST</span> Estoque
-      </button>
-      <button class="dash-nav-item" data-view="comissoes">
-        <span class="dash-nav-icon">COM</span> Comissoes
-      </button>
-      <button class="dash-nav-item" data-view="profissionais">
-  <span class="dash-nav-icon">PRF</span> Profissionais
+<span class="dash-nav-icon">ATD</span> Atendimentos
+</button>
+<button class="dash-nav-item" data-view="vendas">
+<span class="dash-nav-icon">VND</span> Vendas
+</button>
+<button class="dash-nav-item" data-view="financeiro">
+<span class="dash-nav-icon">FIN</span> Financeiro
+</button>
+<button class="dash-nav-item" data-view="estoque">
+<span class="dash-nav-icon">EST</span> Estoque
+</button>
+<button class="dash-nav-item" data-view="comissoes">
+<span class="dash-nav-icon">COM</span> Comissoes
+</button>
+<button class="dash-nav-item" data-view="profissionais">
+<span class="dash-nav-icon">PRF</span> Profissionais
 </button>
 <button class="dash-nav-item" data-view="procedimentos">
-  <span class="dash-nav-icon">PRC</span> Procedimentos
+<span class="dash-nav-icon">PRC</span> Procedimentos
 </button>
 <button class="dash-nav-item" data-view="assinatura">
-  <span class="dash-nav-icon">ASS</span> Assinatura
+<span class="dash-nav-icon">ASS</span> Assinatura
 </button>
 <button class="dash-nav-item" data-view="config">
-        <span class="dash-nav-icon">CFG</span> Configuracoes
-      </button>
-    </nav>
-    <button id="btnLogout" class="dash-logout">Sair</button>
-  </aside>
+<span class="dash-nav-icon">CFG</span> Configuracoes
+</button>
+</nav>
+<button id="btnLogout" class="dash-logout">Sair</button>
+</aside>
 
-  <div class="dash-overlay" id="dashOverlay"></div>
+<div class="dash-overlay" id="dashOverlay"></div>
 
-  <main class="dash-main">
-    <header class="dash-topbar">
-      <button id="btnMenu" class="dash-menu-btn">&#9776;</button>
-      <div class="dash-topbar-title" id="viewTitle">Inicio</div>
-      <div class="dash-user" id="userEmail">...</div>
-    </header>
+<main class="dash-main">
+<header class="dash-topbar">
+<button id="btnMenu" class="dash-menu-btn">&#9776;</button>
+<div class="dash-topbar-title" id="viewTitle">Inicio</div>
+<div class="dash-user" id="userEmail">...</div>
+</header>
 
-    <section class="dash-view active" id="view-inicio">
-      <div class="dash-cards">
-        <div class="dash-card">
-          <span class="dash-card-label">Pacientes cadastrados</span>
-          <span class="dash-card-value" id="statPacientes">0</span>
-        </div>
-        <div class="dash-card">
-          <span class="dash-card-label">Agendamentos futuros</span>
-          <span class="dash-card-value" id="statAgendamentos">0</span>
-        </div>
-        <div class="dash-card">
-          <span class="dash-card-label">Saldo do mes</span>
-          <span class="dash-card-value" id="statSaldo">R$ 0,00</span>
-        </div>
-          <div class="dash-card">
-            <span class="dash-card-label">Entradas do mes</span>
-            <span class="dash-card-value dash-green" id="statEntradasMes">R$ 0,00</span>
-          </div>
-          <div class="dash-card">
-            <span class="dash-card-label">Saidas do mes</span>
-            <span class="dash-card-value dash-red" id="statSaidasMes">R$ 0,00</span>
-          </div>
-      </div>
-      <div class="dash-panel">
-        <h3>Proximos agendamentos</h3>
-        <div id="listProximos" class="dash-list"><p class="dash-empty">Nenhum agendamento ainda.</p></div>
-      </div>
-        <div class="dash-panel">
-          <h3>Proximos aniversariantes</h3>
-          <div id="listAniversariantesHome" class="dash-list"><p class="dash-empty">Nenhum aniversariante nos proximos dias.</p></div>
-        </div>
-      <div class="dash-panel">
-        <h3>Fluxo de caixa (6 meses)</h3>
-        <div id="chartFluxoCaixa" class="dash-chart"></div>
-      </div>
-    </section>
+<section class="dash-view active" id="view-inicio">
+<div class="dash-cards">
+<div class="dash-card">
+<span class="dash-card-label">Pacientes cadastrados</span>
+<span class="dash-card-value" id="statPacientes">0</span>
+</div>
+<div class="dash-card">
+<span class="dash-card-label">Agendamentos futuros</span>
+<span class="dash-card-value" id="statAgendamentos">0</span>
+</div>
+<div class="dash-card">
+<span class="dash-card-label">Saldo do mes</span>
+<span class="dash-card-value" id="statSaldo">R$ 0,00</span>
+</div>
+<div class="dash-card">
+<span class="dash-card-label">Entradas do mes</span>
+<span class="dash-card-value dash-green" id="statEntradasMes">R$ 0,00</span>
+</div>
+<div class="dash-card">
+<span class="dash-card-label">Saidas do mes</span>
+<span class="dash-card-value dash-red" id="statSaidasMes">R$ 0,00</span>
+</div>
+</div>
+<div class="dash-panel">
+<h3>Proximos agendamentos</h3>
+<div id="listProximos" class="dash-list"><p class="dash-empty">Nenhum agendamento ainda.</p></div>
+</div>
+<div class="dash-panel">
+<h3>Proximos aniversariantes</h3>
+<div id="listAniversariantesHome" class="dash-list"><p class="dash-empty">Nenhum aniversariante nos proximos dias.</p></div>
+</div>
+<div class="dash-panel">
+<h3>Fluxo de caixa (6 meses)</h3>
+<div id="chartFluxoCaixa" class="dash-chart"></div>
+</div>
+</section>
 
 <section class="dash-view" id="view-agenda">
-        <div class="dash-panel">
-          <h3>Novo agendamento</h3>
-          <form id="formAgenda" class="dash-form-inline">
-            <input type="text" id="agTitulo" placeholder="Titulo (ex: Limpeza de pele)" required>
-            <select id="agPaciente"><option value="">Sem paciente vinculado</option></select>
-                        <select id="agProfissional"><option value="">Sem profissional</option></select>
-            <input type="datetime-local" id="agData" required>
-                        <input type="datetime-local" id="agFim">
-                        <select id="agStatus">
-                          <option value="agendado">Agendado</option>
-                          <option value="confirmado">Confirmado</option>
-                          <option value="concluido">Concluido</option>
-                          <option value="cancelado">Cancelado</option>
-                          <option value="faltou">Faltou</option>
-                        </select>
-                        <input type="text" id="agObservacoes" placeholder="Observacoes (opcional)">
-            <button type="submit" class="btn-dash-primary">Adicionar</button>
-          </form>
-        </div>
-  
-        <div class="dash-panel">
-          <h3>Bloquear horario / feriado</h3>
-          <form id="formBloqueio" class="dash-form-inline">
-            <input type="text" id="blTitulo" placeholder="Motivo (ex: Feriado, Almoco)" required>
-            <input type="datetime-local" id="blInicio" required>
-            <input type="datetime-local" id="blFim" required>
-            <button type="submit" class="btn-dash-secondary">Bloquear</button>
-          </form>
-        </div>
+<div class="dash-panel">
+<h3>Filtros</h3>
+<div class="dash-form-inline">
+<select id="fAgProfissional"><option value="">Todos os profissionais</option></select>
+<select id="fAgStatus">
+<option value="">Todos os status</option>
+<option value="agendado">Agendado</option>
+<option value="confirmado">Confirmado</option>
+<option value="concluido">Concluido</option>
+<option value="cancelado">Cancelado</option>
+<option value="faltou">Faltou</option>
+<option value="bloqueado">Bloqueio</option>
+</select>
+<select id="fAgPaciente"><option value="">Todos os pacientes</option></select>
+<button type="button" id="fAgAplicar" class="btn-dash-primary">Aplicar</button>
+<button type="button" id="fAgLimpar" class="btn-dash-secondary">Limpar</button>
+</div>
+</div>
 
-            <div class="dash-panel">
-              <h3>Filtros</h3>
-              <div class="dash-form-inline">
-                <select id="fAgProfissional"><option value="">Todos os profissionais</option></select>
-                <select id="fAgStatus">
-                  <option value="">Todos os status</option>
-                  <option value="agendado">Agendado</option>
-                  <option value="confirmado">Confirmado</option>
-                  <option value="concluido">Concluido</option>
-                  <option value="cancelado">Cancelado</option>
-                  <option value="faltou">Faltou</option>
-                  <option value="bloqueado">Bloqueio</option>
-                </select>
-                <select id="fAgPaciente"><option value="">Todos os pacientes</option></select>
-                <button type="button" id="fAgAplicar" class="btn-dash-primary">Aplicar</button>
-                <button type="button" id="fAgLimpar" class="btn-dash-secondary">Limpar</button>
-              </div>
-            </div>
-  
-        <div class="dash-panel">
-          <div class="dash-agenda-toolbar">
-            <div class="dash-agenda-nav">
-              <button type="button" id="agPrev" class="dash-agenda-nav-btn">‹</button>
-              <button type="button" id="agHoje" class="dash-agenda-hoje-btn">Hoje</button>
-              <button type="button" id="agNext" class="dash-agenda-nav-btn">›</button>
-              <span id="agRangeLabel" class="dash-agenda-range"></span>
-            </div>
-            <div class="dash-agenda-views">
-              <button type="button" class="dash-agenda-view-btn" data-agview="dia">Dia</button>
-              <button type="button" class="dash-agenda-view-btn active" data-agview="semana">Semana</button>
-              <button type="button" class="dash-agenda-view-btn" data-agview="mes">Mes</button>
-            </div>
-            <div class="dash-agenda-stats">
-              <span id="agOcupacao">Ocupacao: --</span>
-              <span id="agTotalPeriodo">0 agendamentos</span>
-            </div>
-          </div>
-          <div id="agendaGrid" class="dash-agenda-grid"></div>
-        </div>
-  
-        <div class="dash-panel">
-          <h3>Todos os agendamentos</h3>
-          <div id="listAgenda" class="dash-list"><p class="dash-empty">Nenhum agendamento ainda.</p></div>
-        </div>
-      </section>
+<div class="dash-panel">
+<div class="dash-agenda-toolbar">
+<div class="dash-agenda-nav">
+<button type="button" id="agPrev" class="dash-agenda-nav-btn">‹</button>
+<button type="button" id="agHoje" class="dash-agenda-hoje-btn">Hoje</button>
+<button type="button" id="agNext" class="dash-agenda-nav-btn">›</button>
+<span id="agRangeLabel" class="dash-agenda-range"></span>
+</div>
+<div class="dash-agenda-views">
+<button type="button" class="dash-agenda-view-btn" data-agview="dia">Dia</button>
+<button type="button" class="dash-agenda-view-btn active" data-agview="semana">Semana</button>
+<button type="button" class="dash-agenda-view-btn" data-agview="mes">Mes</button>
+</div>
+<div class="dash-agenda-stats">
+<span id="agOcupacao">Ocupacao: --</span>
+<span id="agTotalPeriodo">0 agendamentos</span>
+</div>
+</div>
+<p class="dash-agenda-hint">Clique e arraste na grade para criar um agendamento, bloqueio, lembrete ou evento em intervalos de 30 minutos. Clique em um item existente para editar ou excluir.</p>
+<div id="agendaGrid" class="dash-agenda-grid"></div>
+</div>
 
-          <div id="agModalOverlay" class="dash-modal-overlay">
-            <div class="dash-modal-box">
-              <button type="button" id="agModalFechar" class="dash-modal-close">&times</button>
-              <h3>Detalhes do agendamento</h3>
-              <form id="formAgModal">
-                <input type="hidden" id="agModId">
-                <label>Titulo</label>
-                <input type="text" id="agModTitulo" required>
-                <label>Paciente</label>
-                <select id="agModPaciente"><option value="">Sem paciente vinculado</option></select>
-                <label>Profissional</label>
-                <select id="agModProfissional"><option value="">Sem profissional</option></select>
-                <label>Status</label>
-                <select id="agModStatus">
-                  <option value="agendado">Agendado</option>
-                  <option value="confirmado">Confirmado</option>
-                  <option value="concluido">Concluido</option>
-                  <option value="cancelado">Cancelado</option>
-                  <option value="faltou">Faltou</option>
-                  <option value="bloqueado">Bloqueio</option>
-                </select>
-                <label>Inicio</label>
-                <input type="datetime-local" id="agModInicio" required>
-                <label>Fim</label>
-                <input type="datetime-local" id="agModFim">
-                <label>Observacoes</label>
-                <textarea id="agModObservacoes" rows="3"></textarea>
-                <div class="dash-modal-actions">
-                  <button type="submit" class="btn-dash-primary">Salvar</button>
-                  <button type="button" id="agModExcluirBtn" class="dash-del-btn">Excluir</button>
-                </div>
-              </form>
-              <div id="agModConfirm" class="dash-modal-confirm">
-                <p>Excluir este agendamento? Essa acao nao pode ser desfeita.</p>
-                <button type="button" id="agModConfirmSim" class="dash-del-btn">Sim, excluir</button>
-                <button type="button" id="agModConfirmNao" class="btn-dash-secondary">Cancelar</button>
-              </div>
-            </div>
-          </div>
+<div class="dash-panel">
+<h3>Todos os agendamentos</h3>
+<div id="listAgenda" class="dash-list"><p class="dash-empty">Nenhum agendamento ainda.</p></div>
+</div>
+</section>
 
-    <section class="dash-view" id="view-pacientes">
-      <div class="dash-panel">
-        <h3>Novo paciente</h3>
-        <form id="formPaciente" class="dash-form-inline">
-          <input type="text" id="pacNome" placeholder="Nome completo" required>
-          <input type="text" id="pacWhatsapp" placeholder="WhatsApp">
-          <input type="email" id="pacEmail" placeholder="E-mail">
-            <input type="date" id="pacNascimento" placeholder="Data de nascimento">
-          <button type="submit" class="btn-dash-primary">Adicionar</button>
-        </form>
-      </div>
-      <div class="dash-panel">
-        <h3>Lista de pacientes</h3>
-        <div id="listPacientes" class="dash-list"><p class="dash-empty">Nenhum paciente cadastrado.</p></div>
-      </div>
-    </section>
+<div id="agModalOverlay" class="dash-modal-overlay">
+<div class="dash-modal-box">
+<button type="button" id="agModalFechar" class="dash-modal-close">&times</button>
+<h3 id="agModalTitulo">Novo agendamento</h3>
+<div class="dash-modal-tabs" id="agModalTabs">
+<button type="button" class="dash-modal-tab active" data-tipo="agendamento">Agendamento</button>
+<button type="button" class="dash-modal-tab" data-tipo="bloqueio">Bloqueio</button>
+<button type="button" class="dash-modal-tab" data-tipo="lembrete">Lembrete</button>
+<button type="button" class="dash-modal-tab" data-tipo="evento">Evento</button>
+</div>
+<form id="formAgModal">
+<input type="hidden" id="agModId">
+<input type="hidden" id="agModTipo" value="agendamento">
+<label>Titulo</label>
+<input type="text" id="agModTitulo" required>
+<div id="agModPacienteWrap">
+<label>Paciente</label>
+<select id="agModPaciente"><option value="">Sem paciente vinculado</option></select>
+</div>
+<div id="agModProfissionalWrap">
+<label>Profissional</label>
+<select id="agModProfissional"><option value="">Sem profissional</option></select>
+</div>
+<div id="agModStatusWrap">
+<label>Status</label>
+<select id="agModStatus">
+<option value="agendado">Agendado</option>
+<option value="confirmado">Confirmado</option>
+<option value="concluido">Concluido</option>
+<option value="cancelado">Cancelado</option>
+<option value="faltou">Faltou</option>
+</select>
+</div>
+<label>Inicio</label>
+<input type="datetime-local" id="agModInicio" required>
+<label>Fim</label>
+<input type="datetime-local" id="agModFim">
+<label>Observacoes</label>
+<textarea id="agModObservacoes" rows="3"></textarea>
+<div class="dash-modal-actions">
+<button type="submit" class="btn-dash-primary">Salvar</button>
+<button type="button" id="agModExcluirBtn" class="dash-del-btn">Excluir</button>
+</div>
+</form>
+<div id="agModConfirm" class="dash-modal-confirm">
+<p>Excluir este agendamento? Essa acao nao pode ser desfeita.</p>
+<button type="button" id="agModConfirmSim" class="dash-del-btn">Sim, excluir</button>
+<button type="button" id="agModConfirmNao" class="btn-dash-secondary">Cancelar</button>
+</div>
+</div>
+</div>
 
-    <section class="dash-view" id="view-leads">
-      <div class="dash-panel">
-        <h3>Novo lead</h3>
-        <form id="formLead" class="dash-form-inline">
-          <input type="text" id="ledNome" placeholder="Nome completo" required>
-          <input type="text" id="ledTelefone" placeholder="WhatsApp / Telefone">
-          <input type="email" id="ledEmail" placeholder="E-mail">
-          <input type="text" id="ledOrigem" placeholder="Origem (ex: Instagram, indicacao)">
-          <select id="ledStatus">
-            <option value="novo">Novo</option>
-            <option value="em_contato">Em contato</option>
-            <option value="convertido">Convertido</option>
-            <option value="perdido">Perdido</option>
-          </select>
-          <button type="submit" class="btn-dash-primary">Adicionar</button>
-        </form>
-      </div>
-      <div class="dash-panel">
-        <h3>Leads</h3>
-        <div id="listLeads" class="dash-list"><p class="dash-empty">Nenhum lead cadastrado.</p></div>
-      </div>
-    </section>
+<section class="dash-view" id="view-pacientes">
+<div class="dash-panel">
+<h3>Novo paciente</h3>
+<form id="formPaciente" class="dash-form-inline">
+<input type="text" id="pacNome" placeholder="Nome completo" required>
+<input type="text" id="pacWhatsapp" placeholder="WhatsApp">
+<input type="email" id="pacEmail" placeholder="E-mail">
+<input type="date" id="pacNascimento" placeholder="Data de nascimento">
+<button type="submit" class="btn-dash-primary">Adicionar</button>
+</form>
+</div>
+<div class="dash-panel">
+<h3>Lista de pacientes</h3>
+<div id="listPacientes" class="dash-list"><p class="dash-empty">Nenhum paciente cadastrado.</p></div>
+</div>
+</section>
 
-      <section class="dash-view" id="view-aniversariantes">
-        <div class="dash-panel">
-          <h3>Aniversariantes</h3>
-          <div class="dash-form-inline">
-            <select id="aniMes">
-              <option value="1">Janeiro</option>
-              <option value="2">Fevereiro</option>
-              <option value="3">Marco</option>
-              <option value="4">Abril</option>
-              <option value="5">Maio</option>
-              <option value="6">Junho</option>
-              <option value="7">Julho</option>
-              <option value="8">Agosto</option>
-              <option value="9">Setembro</option>
-              <option value="10">Outubro</option>
-              <option value="11">Novembro</option>
-              <option value="12">Dezembro</option>
-            </select>
-          </div>
-        </div>
-        <div class="dash-panel">
-          <h3>Lista de aniversariantes</h3>
-          <div id="listAniversariantes" class="dash-list"><p class="dash-empty">Nenhum aniversariante neste mes.</p></div>
-        </div>
-      </section>
-  <section class="dash-view" id="view-atendimentos">
-      <div class="dash-panel">
-            <h3>Novo atendimento</h3>
-            <form id="formAtendimento" class="dash-form-inline">
-                    <select id="atdPaciente"><option value="">Sem paciente vinculado</option></select>
-                    <select id="atdProfissional"><option value="">Sem profissional</option></select>
+<section class="dash-view" id="view-leads">
+<div class="dash-panel">
+<h3>Novo lead</h3>
+<form id="formLead" class="dash-form-inline">
+<input type="text" id="ledNome" placeholder="Nome completo" required>
+<input type="text" id="ledTelefone" placeholder="WhatsApp / Telefone">
+<input type="email" id="ledEmail" placeholder="E-mail">
+<input type="text" id="ledOrigem" placeholder="Origem (ex: Instagram, indicacao)">
+<select id="ledStatus">
+<option value="novo">Novo</option>
+<option value="em_contato">Em contato</option>
+<option value="convertido">Convertido</option>
+<option value="perdido">Perdido</option>
+</select>
+<button type="submit" class="btn-dash-primary">Adicionar</button>
+</form>
+</div>
+<div class="dash-panel">
+<h3>Leads</h3>
+<div id="listLeads" class="dash-list"><p class="dash-empty">Nenhum lead cadastrado.</p></div>
+</div>
+</section>
+
+<section class="dash-view" id="view-aniversariantes">
+<div class="dash-panel">
+<h3>Aniversariantes</h3>
+<div class="dash-form-inline">
+<select id="aniMes">
+<option value="1">Janeiro</option>
+<option value="2">Fevereiro</option>
+<option value="3">Marco</option>
+<option value="4">Abril</option>
+<option value="5">Maio</option>
+<option value="6">Junho</option>
+<option value="7">Julho</option>
+<option value="8">Agosto</option>
+<option value="9">Setembro</option>
+<option value="10">Outubro</option>
+<option value="11">Novembro</option>
+<option value="12">Dezembro</option>
+</select>
+</div>
+</div>
+<div class="dash-panel">
+<h3>Lista de aniversariantes</h3>
+<div id="listAniversariantes" class="dash-list"><p class="dash-empty">Nenhum aniversariante neste mes.</p></div>
+</div>
+</section>
+<section class="dash-view" id="view-atendimentos">
+<div class="dash-panel">
+<h3>Novo atendimento</h3>
+<form id="formAtendimento" class="dash-form-inline">
+<select id="atdPaciente"><option value="">Sem paciente vinculado</option></select>
+<select id="atdProfissional"><option value="">Sem profissional</option></select>
 <select id="atdProcedimento" required><option value="">Selecione um procedimento</option></select>
 <input type="datetime-local" id="atdData" required>
-                    <select id="atdStatus">
-                              <option value="em_andamento">Em andamento</option>
-                              <option value="concluido">Concluido</option>
-                              <option value="cancelado">Cancelado</option>
-                    </select>
-                    <button type="submit" class="btn-dash-primary">Adicionar</button>
-            </form>
-      </div>
-      <div class="dash-panel">
-            <h3>Atendimentos</h3>
-                <div id="listAtendimentos" class="dash-list"><p class="dash-empty">Nenhum atendimento ainda.</p></div>
-      </div>
-  </section>
-    <section class="dash-view" id="view-vendas">
-      <div class="dash-cards">
-        <div class="dash-card">
-          <span class="dash-card-label">Faturamento</span>
-          <span class="dash-card-value" id="vndStatFaturamento">R$ 0,00</span>
-        </div>
-        <div class="dash-card">
-          <span class="dash-card-label">Vendas</span>
-          <span class="dash-card-value" id="vndStatCount">0</span>
-        </div>
-        <div class="dash-card">
-          <span class="dash-card-label">Ticket medio</span>
-          <span class="dash-card-value" id="vndStatTicket">R$ 0,00</span>
-        </div>
-        <div class="dash-card">
-          <span class="dash-card-label">Valor pendente</span>
-          <span class="dash-card-value" id="vndStatPendente">R$ 0,00</span>
-        </div>
-      </div>
-      <div class="dash-panel">
-        <h3>Nova venda</h3>
-  <form id="formVenda" class="dash-form-inline">
-    <select id="vndPaciente"><option value="">Sem paciente vinculado</option></select>
-    <input type="text" id="vndDescricao" placeholder="Descricao / produto ou servico" required>
-    <input type="number" id="vndValor" placeholder="Valor (R$)" step="0.01" min="0" required>
-    <select id="vndFormaPagamento">
-      <option value="dinheiro">Dinheiro</option>
-      <option value="cartao">Cartao</option>
-      <option value="pix">Pix</option>
-      <option value="outro">Outro</option>
-    </select>
-    <select id="vndStatus">
-      <option value="pago">Pago</option>
-      <option value="pendente">Pendente</option>
-      <option value="cancelado">Cancelado</option>
-    </select>
-    <input type="date" id="vndData" required>
-    <button type="submit" class="btn-dash-primary">Adicionar</button>
-  </form>
-      </div>
-      <div class="dash-panel">
-        <h3>Vendas</h3>
-        <div id="listVendas" class="dash-list"><p class="dash-empty">Nenhuma venda ainda.</p></div>
-      </div>
-      <div class="dash-panel">
-        <h3>Ranking por procedimento/produto</h3>
-        <div id="listVendasRankingProduto" class="dash-list"><p class="dash-empty">Sem dados ainda.</p></div>
-      </div>
-      <div class="dash-panel">
-        <h3>Ranking por paciente</h3>
-        <div id="listVendasRankingPaciente" class="dash-list"><p class="dash-empty">Sem dados ainda.</p></div>
-      </div>
-      </section>
-    <section class="dash-view" id="view-financeiro">
-      <div class="dash-cards">
-        <div class="dash-card"><span class="dash-card-label">Entradas</span><span class="dash-card-value dash-green" id="finEntradas">R$ 0,00</span></div>
-        <div class="dash-card"><span class="dash-card-label">Saidas</span><span class="dash-card-value dash-red" id="finSaidas">R$ 0,00</span></div>
-        <div class="dash-card"><span class="dash-card-label">Saldo</span><span class="dash-card-value" id="finSaldo">R$ 0,00</span></div>
-        <div class="dash-card"><span class="dash-card-label">A receber</span><span class="dash-card-value dash-green" id="finAReceber">R$ 0,00</span></div>
-        <div class="dash-card"><span class="dash-card-label">A pagar</span><span class="dash-card-value dash-red" id="finAPagar">R$ 0,00</span></div>
-      </div>
-      <div class="dash-panel">
-        <h3>Novo lancamento</h3>
-        <form id="formFinanceiro" class="dash-form-inline">
-          <select id="finTipo">
-            <option value="entrada">Entrada</option>
-            <option value="saida">Saida</option>
-          </select>
-          <input type="text" id="finDescricao" placeholder="Descricao" required>
-          <input type="number" id="finValor" placeholder="Valor (R$)" step="0.01" required>
-          <input type="date" id="finData" required>
-        <select id="finStatus">
-          <option value="pago">Pago</option>
-          <option value="pendente">Pendente</option>
-        </select>
-        <input type="date" id="finVencimento" placeholder="Vencimento">
-          <button type="submit" class="btn-dash-primary">Adicionar</button>
-        </form>
-      </div>
-      <div class="dash-panel">
-        <h3>Lancamentos</h3>
-        <div id="listFinanceiro" class="dash-list"><p class="dash-empty">Nenhum lancamento ainda.</p></div>
-      </div>
-    </section>
+<select id="atdStatus">
+<option value="em_andamento">Em andamento</option>
+<option value="concluido">Concluido</option>
+<option value="cancelado">Cancelado</option>
+</select>
+<button type="submit" class="btn-dash-primary">Adicionar</button>
+</form>
+</div>
+<div class="dash-panel">
+<h3>Atendimentos</h3>
+<div id="listAtendimentos" class="dash-list"><p class="dash-empty">Nenhum atendimento ainda.</p></div>
+</div>
+</section>
+<section class="dash-view" id="view-vendas">
+<div class="dash-cards">
+<div class="dash-card">
+<span class="dash-card-label">Faturamento</span>
+<span class="dash-card-value" id="vndStatFaturamento">R$ 0,00</span>
+</div>
+<div class="dash-card">
+<span class="dash-card-label">Vendas</span>
+<span class="dash-card-value" id="vndStatCount">0</span>
+</div>
+<div class="dash-card">
+<span class="dash-card-label">Ticket medio</span>
+<span class="dash-card-value" id="vndStatTicket">R$ 0,00</span>
+</div>
+<div class="dash-card">
+<span class="dash-card-label">Valor pendente</span>
+<span class="dash-card-value" id="vndStatPendente">R$ 0,00</span>
+</div>
+</div>
+<div class="dash-panel">
+<h3>Nova venda</h3>
+<form id="formVenda" class="dash-form-inline">
+<select id="vndPaciente"><option value="">Sem paciente vinculado</option></select>
+<input type="text" id="vndDescricao" placeholder="Descricao / produto ou servico" required>
+<input type="number" id="vndValor" placeholder="Valor (R$)" step="0.01" min="0" required>
+<select id="vndFormaPagamento">
+<option value="dinheiro">Dinheiro</option>
+<option value="cartao">Cartao</option>
+<option value="pix">Pix</option>
+<option value="outro">Outro</option>
+</select>
+<select id="vndStatus">
+<option value="pago">Pago</option>
+<option value="pendente">Pendente</option>
+<option value="cancelado">Cancelado</option>
+</select>
+<input type="date" id="vndData" required>
+<button type="submit" class="btn-dash-primary">Adicionar</button>
+</form>
+</div>
+<div class="dash-panel">
+<h3>Vendas</h3>
+<div id="listVendas" class="dash-list"><p class="dash-empty">Nenhuma venda ainda.</p></div>
+</div>
+<div class="dash-panel">
+<h3>Ranking por procedimento/produto</h3>
+<div id="listVendasRankingProduto" class="dash-list"><p class="dash-empty">Sem dados ainda.</p></div>
+</div>
+<div class="dash-panel">
+<h3>Ranking por paciente</h3>
+<div id="listVendasRankingPaciente" class="dash-list"><p class="dash-empty">Sem dados ainda.</p></div>
+</div>
+</section>
+<section class="dash-view" id="view-financeiro">
+<div class="dash-cards">
+<div class="dash-card"><span class="dash-card-label">Entradas</span><span class="dash-card-value dash-green" id="finEntradas">R$ 0,00</span></div>
+<div class="dash-card"><span class="dash-card-label">Saidas</span><span class="dash-card-value dash-red" id="finSaidas">R$ 0,00</span></div>
+<div class="dash-card"><span class="dash-card-label">Saldo</span><span class="dash-card-value" id="finSaldo">R$ 0,00</span></div>
+<div class="dash-card"><span class="dash-card-label">A receber</span><span class="dash-card-value dash-green" id="finAReceber">R$ 0,00</span></div>
+<div class="dash-card"><span class="dash-card-label">A pagar</span><span class="dash-card-value dash-red" id="finAPagar">R$ 0,00</span></div>
+</div>
+<div class="dash-panel">
+<h3>Novo lancamento</h3>
+<form id="formFinanceiro" class="dash-form-inline">
+<select id="finTipo">
+<option value="entrada">Entrada</option>
+<option value="saida">Saida</option>
+</select>
+<input type="text" id="finDescricao" placeholder="Descricao" required>
+<input type="number" id="finValor" placeholder="Valor (R$)" step="0.01" required>
+<input type="date" id="finData" required>
+<select id="finStatus">
+<option value="pago">Pago</option>
+<option value="pendente">Pendente</option>
+</select>
+<input type="date" id="finVencimento" placeholder="Vencimento">
+<button type="submit" class="btn-dash-primary">Adicionar</button>
+</form>
+</div>
+<div class="dash-panel">
+<h3>Lancamentos</h3>
+<div id="listFinanceiro" class="dash-list"><p class="dash-empty">Nenhum lancamento ainda.</p></div>
+</div>
+</section>
 
-    <section class="dash-view" id="view-estoque">
-      <div class="dash-panel">
-        <h3>Novo item</h3>
-        <form id="formEstoque" class="dash-form-inline">
-          <input type="text" id="estNome" placeholder="Nome do item" required>
-          <input type="number" id="estQtd" placeholder="Quantidade" required>
-          <input type="number" id="estQtdMin" placeholder="Qtd. minima">
-          <input type="number" id="estPreco" placeholder="Preco (R$)" step="0.01">
-          <button type="submit" class="btn-dash-primary">Adicionar</button>
-        </form>
-      </div>
-      <div class="dash-panel">
-        <h3>Itens em estoque</h3>
-        <div id="listEstoque" class="dash-list"><p class="dash-empty">Nenhum item cadastrado.</p></div>
-      </div>
+<section class="dash-view" id="view-estoque">
+<div class="dash-panel">
+<h3>Novo item</h3>
+<form id="formEstoque" class="dash-form-inline">
+<input type="text" id="estNome" placeholder="Nome do item" required>
+<input type="number" id="estQtd" placeholder="Quantidade" required>
+<input type="number" id="estQtdMin" placeholder="Qtd. minima">
+<input type="number" id="estPreco" placeholder="Preco (R$)" step="0.01">
+<button type="submit" class="btn-dash-primary">Adicionar</button>
+</form>
+</div>
+<div class="dash-panel">
+<h3>Itens em estoque</h3>
+<div id="listEstoque" class="dash-list"><p class="dash-empty">Nenhum item cadastrado.</p></div>
+</div>
 <div class="dash-panel">
 <h3>Novo fornecedor</h3>
 <form id="formFornecedor" class="dash-form-inline">
@@ -423,30 +406,30 @@
 <h3>Fornecedores</h3>
 <div id="listFornecedores" class="dash-list"><p class="dash-empty">Nenhum fornecedor cadastrado.</p></div>
 </div>
-    </section>
-    <section class="dash-view" id="view-comissoes">
-      <div class="dash-cards">
-        <div class="dash-card"><span class="dash-card-label">Comissoes em aberto</span><span class="dash-card-value dash-red" id="comAberto">R$ 0,00</span></div>
-        <div class="dash-card"><span class="dash-card-label">Comissoes pagas</span><span class="dash-card-value dash-green" id="comPagas">R$ 0,00</span></div>
-        <div class="dash-card"><span class="dash-card-label">Total</span><span class="dash-card-value" id="comTotal">R$ 0,00</span></div>
-      </div>
-      <div class="dash-panel">
-        <h3>Nova comissao</h3>
-        <form id="formComissao" class="dash-form-inline">
-        <select id="comProfissional"><option value="">Sem profissional</option></select>
+</section>
+<section class="dash-view" id="view-comissoes">
+<div class="dash-cards">
+<div class="dash-card"><span class="dash-card-label">Comissoes em aberto</span><span class="dash-card-value dash-red" id="comAberto">R$ 0,00</span></div>
+<div class="dash-card"><span class="dash-card-label">Comissoes pagas</span><span class="dash-card-value dash-green" id="comPagas">R$ 0,00</span></div>
+<div class="dash-card"><span class="dash-card-label">Total</span><span class="dash-card-value" id="comTotal">R$ 0,00</span></div>
+</div>
+<div class="dash-panel">
+<h3>Nova comissao</h3>
+<form id="formComissao" class="dash-form-inline">
+<select id="comProfissional"><option value="">Sem profissional</option></select>
 <input type="text" id="comDescricao" placeholder="Descricao (ex: venda pacote X)" required>
-        <input type="number" id="comValorBase" placeholder="Valor base (R$)" step="0.01" min="0">
-        <input type="number" id="comPercentual" placeholder="Percentual (%)" step="0.01" min="0">
-        <input type="number" id="comValorComissao" placeholder="Valor da comissao (R$)" step="0.01" min="0" required>
-        <input type="date" id="comData" required>
-        <button type="submit" class="btn-dash-primary">Adicionar</button>
-        </form>
-      </div>
-      <div class="dash-panel">
-        <h3>Comissoes</h3>
-        <div id="listComissoes" class="dash-list"><p class="dash-empty">Nenhuma comissao ainda.</p></div>
-      </div>
-    </section>
+<input type="number" id="comValorBase" placeholder="Valor base (R$)" step="0.01" min="0">
+<input type="number" id="comPercentual" placeholder="Percentual (%)" step="0.01" min="0">
+<input type="number" id="comValorComissao" placeholder="Valor da comissao (R$)" step="0.01" min="0" required>
+<input type="date" id="comData" required>
+<button type="submit" class="btn-dash-primary">Adicionar</button>
+</form>
+</div>
+<div class="dash-panel">
+<h3>Comissoes</h3>
+<div id="listComissoes" class="dash-list"><p class="dash-empty">Nenhuma comissao ainda.</p></div>
+</div>
+</section>
 
 <section class="dash-view" id="view-profissionais">
 <div class="dash-panel">
@@ -492,26 +475,26 @@
 </div>
 </section>
 
-    <section class="dash-view" id="view-config">
-      <div class="dash-panel">
-        <h3>Minha conta</h3>
-        <p><strong>E-mail:</strong> <span id="cfgEmail">-</span></p>
-        <p><strong>Nome da clinica:</strong> <span id="cfgClinica">-</span></p>
-        <p><strong>Plano:</strong> <span id="cfgPlano">-</span></p>
-      </div>
-      <div class="dash-panel">
-        <h3>Editar dados da clinica</h3>
-        <form id="formConfig" class="dash-form-inline">
-          <input type="text" id="cfgNomeInput" placeholder="Nome da clinica" required>
-          <button type="submit" class="btn-dash-primary">Salvar alteracoes</button>
-        </form>
-      </div>
-      <div class="dash-panel"><h3>Horario de funcionamento</h3><form id="formHorario" class="dash-form-inline"><label class="dash-check"><input type="checkbox" class="cfgDia" value="1"> Seg </label><label class="dash-check"><input type="checkbox" class="cfgDia" value="2"> Ter </label><label class="dash-check"><input type="checkbox" class="cfgDia" value="3"> Qua </label><label class="dash-check"><input type="checkbox" class="cfgDia" value="4"> Qui </label><label class="dash-check"><input type="checkbox" class="cfgDia" value="5"> Sex </label><label class="dash-check"><input type="checkbox" class="cfgDia" value="6"> Sab </label><label class="dash-check"><input type="checkbox" class="cfgDia" value="0"> Dom </label><input type="time" id="cfgAbertura"><input type="time" id="cfgFechamento"><button type="submit" class="btn-dash-primary">Salvar horario</button></form><p id="cfgHorarioResumo" class="dash-empty"></p></div><div class="dash-panel"><h3>Salas de atendimento</h3><form id="formSala" class="dash-form-inline"><input type="text" id="salaNome" placeholder="Nome da sala"><input type="number" id="salaCapacidade" placeholder="Capacidade" min="1"><button type="submit" class="btn-dash-primary">Adicionar</button></form></div><div class="dash-panel"><h3>Salas</h3><div id="listSalas" class="dash-list"><p class="dash-empty">Nenhuma sala cadastrada.</p></div></div>
-    </section>
-  </main>
+<section class="dash-view" id="view-config">
+<div class="dash-panel">
+<h3>Minha conta</h3>
+<p><strong>E-mail:</strong> <span id="cfgEmail">-</span></p>
+<p><strong>Nome da clinica:</strong> <span id="cfgClinica">-</span></p>
+<p><strong>Plano:</strong> <span id="cfgPlano">-</span></p>
+</div>
+<div class="dash-panel">
+<h3>Editar dados da clinica</h3>
+<form id="formConfig" class="dash-form-inline">
+<input type="text" id="cfgNomeInput" placeholder="Nome da clinica" required>
+<button type="submit" class="btn-dash-primary">Salvar alteracoes</button>
+</form>
+</div>
+<div class="dash-panel"><h3>Horario de funcionamento</h3><form id="formHorario" class="dash-form-inline"><label class="dash-check"><input type="checkbox" class="cfgDia" value="1"> Seg </label><label class="dash-check"><input type="checkbox" class="cfgDia" value="2"> Ter </label><label class="dash-check"><input type="checkbox" class="cfgDia" value="3"> Qua </label><label class="dash-check"><input type="checkbox" class="cfgDia" value="4"> Qui </label><label class="dash-check"><input type="checkbox" class="cfgDia" value="5"> Sex </label><label class="dash-check"><input type="checkbox" class="cfgDia" value="6"> Sab </label><label class="dash-check"><input type="checkbox" class="cfgDia" value="0"> Dom </label><input type="time" id="cfgAbertura"><input type="time" id="cfgFechamento"><button type="submit" class="btn-dash-primary">Salvar horario</button></form><p id="cfgHorarioResumo" class="dash-empty"></p></div><div class="dash-panel"><h3>Salas de atendimento</h3><form id="formSala" class="dash-form-inline"><input type="text" id="salaNome" placeholder="Nome da sala"><input type="number" id="salaCapacidade" placeholder="Capacidade" min="1"><button type="submit" class="btn-dash-primary">Adicionar</button></form></div><div class="dash-panel"><h3>Salas</h3><div id="listSalas" class="dash-list"><p class="dash-empty">Nenhuma sala cadastrada.</p></div></div>
+</section>
+</main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="auth.js"></script>
-  <script src="dashboard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<script src="dashboard.js"></script>
 </body>
 </html>
