@@ -113,7 +113,17 @@
           <form id="formAgenda" class="dash-form-inline">
             <input type="text" id="agTitulo" placeholder="Titulo (ex: Limpeza de pele)" required>
             <select id="agPaciente"><option value="">Sem paciente vinculado</option></select>
+                        <select id="agProfissional"><option value="">Sem profissional</option></select>
             <input type="datetime-local" id="agData" required>
+                        <input type="datetime-local" id="agFim">
+                        <select id="agStatus">
+                          <option value="agendado">Agendado</option>
+                          <option value="confirmado">Confirmado</option>
+                          <option value="concluido">Concluido</option>
+                          <option value="cancelado">Cancelado</option>
+                          <option value="faltou">Faltou</option>
+                        </select>
+                        <input type="text" id="agObservacoes" placeholder="Observacoes (opcional)">
             <button type="submit" class="btn-dash-primary">Adicionar</button>
           </form>
         </div>
@@ -127,6 +137,25 @@
             <button type="submit" class="btn-dash-secondary">Bloquear</button>
           </form>
         </div>
+
+            <div class="dash-panel">
+              <h3>Filtros</h3>
+              <div class="dash-form-inline">
+                <select id="fAgProfissional"><option value="">Todos os profissionais</option></select>
+                <select id="fAgStatus">
+                  <option value="">Todos os status</option>
+                  <option value="agendado">Agendado</option>
+                  <option value="confirmado">Confirmado</option>
+                  <option value="concluido">Concluido</option>
+                  <option value="cancelado">Cancelado</option>
+                  <option value="faltou">Faltou</option>
+                  <option value="bloqueado">Bloqueio</option>
+                </select>
+                <select id="fAgPaciente"><option value="">Todos os pacientes</option></select>
+                <button type="button" id="fAgAplicar" class="btn-dash-primary">Aplicar</button>
+                <button type="button" id="fAgLimpar" class="btn-dash-secondary">Limpar</button>
+              </div>
+            </div>
   
         <div class="dash-panel">
           <div class="dash-agenda-toolbar">
@@ -154,6 +183,46 @@
           <div id="listAgenda" class="dash-list"><p class="dash-empty">Nenhum agendamento ainda.</p></div>
         </div>
       </section>
+
+          <div id="agModalOverlay" class="dash-modal-overlay">
+            <div class="dash-modal-box">
+              <button type="button" id="agModalFechar" class="dash-modal-close">&times</button>
+              <h3>Detalhes do agendamento</h3>
+              <form id="formAgModal">
+                <input type="hidden" id="agModId">
+                <label>Titulo</label>
+                <input type="text" id="agModTitulo" required>
+                <label>Paciente</label>
+                <select id="agModPaciente"><option value="">Sem paciente vinculado</option></select>
+                <label>Profissional</label>
+                <select id="agModProfissional"><option value="">Sem profissional</option></select>
+                <label>Status</label>
+                <select id="agModStatus">
+                  <option value="agendado">Agendado</option>
+                  <option value="confirmado">Confirmado</option>
+                  <option value="concluido">Concluido</option>
+                  <option value="cancelado">Cancelado</option>
+                  <option value="faltou">Faltou</option>
+                  <option value="bloqueado">Bloqueio</option>
+                </select>
+                <label>Inicio</label>
+                <input type="datetime-local" id="agModInicio" required>
+                <label>Fim</label>
+                <input type="datetime-local" id="agModFim">
+                <label>Observacoes</label>
+                <textarea id="agModObservacoes" rows="3"></textarea>
+                <div class="dash-modal-actions">
+                  <button type="submit" class="btn-dash-primary">Salvar</button>
+                  <button type="button" id="agModExcluirBtn" class="dash-del-btn">Excluir</button>
+                </div>
+              </form>
+              <div id="agModConfirm" class="dash-modal-confirm">
+                <p>Excluir este agendamento? Essa acao nao pode ser desfeita.</p>
+                <button type="button" id="agModConfirmSim" class="dash-del-btn">Sim, excluir</button>
+                <button type="button" id="agModConfirmNao" class="btn-dash-secondary">Cancelar</button>
+              </div>
+            </div>
+          </div>
 
     <section class="dash-view" id="view-pacientes">
       <div class="dash-panel">
