@@ -1207,7 +1207,7 @@ document.getElementById('agModFim').value = ev.data_fim ? agFormatarParaInput(ne
 var excluirBtn = document.getElementById('agModExcluirBtn');
 if (excluirBtn) excluirBtn.style.display = '';
 document.getElementById('agModConfirm').classList.remove('open');
-var tipoInicial = ev.status === 'bloqueado' ? 'bloqueio' : 'agendamento';
+var tipoInicial = ev.status === 'bloqueado' ? 'bloqueio' : (ev.titulo && ev.titulo.indexOf('[Lembrete]') === 0 ? 'lembrete' : (ev.titulo && ev.titulo.indexOf('[Evento]') === 0 ? 'evento' : 'agendamento'));
 agSetTipo(tipoInicial);
 document.getElementById('agModalTitulo').textContent = 'Editar agendamento';
 document.getElementById('agModalOverlay').classList.add('open');
