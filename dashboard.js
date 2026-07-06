@@ -1530,11 +1530,13 @@ var maxS = Math.max.apply(null, allS), minS = Math.min.apply(null, allS);
 if (maxS === minS) { maxS += 1; minS -= 1; }
 var n = buckets.length || 1;
 function sy(v) { return (100 - ((v - minS) / (maxS - minS)) * 100); }
-function bar(h, c) { return '<div class="dash-chart-bar" style="height:' + Math.round((h / maxBar) * 150) + 'px;background:' + c + '"></div>'; }
+function bar(h, c, t) { return '<div class="dash-chart-bar" title="' + t + '" style="height:' + Math.round((h / maxBar) * 150) + 'px;background:' + c + '"></div>'; }
 var barsHtml = buckets.map(function (b) {
 return '<div class="dash-chart-month"><div class="dash-chart-bars">'
-+ bar(b.entradaReal, '#12b76a') + bar(b.entradaPrev, '#a6e9c5')
-+ bar(b.saidaReal, '#f04438') + bar(b.saidaPrev, '#fca5a0')
++ bar(b.entradaReal, '#12b76a', b.label + ' - Entradas: ' + fmtMoney(b.entradaReal))
++ bar(b.entradaPrev, '#a6e9c5', b.label + ' - Entradas previstas: ' + fmtMoney(b.entradaPrev))
++ bar(b.saidaReal, '#f04438', b.label + ' - Saidas: ' + fmtMoney(b.saidaReal))
++ bar(b.saidaPrev, '#fca5a0', b.label + ' - Saidas previstas: ' + fmtMoney(b.saidaPrev))
 + '</div><span class="dash-chart-label">' + b.label + '</span></div>';
 }).join('');
 var ptsR = saldoR.map(function (v, i) { return (i + 0.5) + ',' + sy(v).toFixed(2); }).join(' ');
@@ -1601,7 +1603,7 @@ var len = (counts[k] / total) * C;
 segs += '<circle cx="60" cy="60" r="45" fill="none" stroke="' + colors[k] + '" stroke-width="18" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) + '" stroke-dashoffset="' + (-offset).toFixed(2) + '" transform="rotate(-90 60 60)"></circle>';
 offset += len;
 });
-var legend = order.map(function (k) { return '<div class="in-donut-leg"><span class="in-donut-dot" style="background:' + colors[k] + '"></span>' + labels[k] + ' <strong>' + counts[k] + '</strong></div>'; }).join('');
+var legend = order.map(function (k) { var pct = Math.round(counts[k] / total * 100); return '<div class="in-donut-leg"><span class="in-donut-dot" style="background:' + colors[k] + '"></span>' + labels[k] + ' <strong>' + counts[k] + '</strong> <span class="in-donut-pct">(' + pct + '%)</span></div>'; }).join('');
 el.innerHTML = '<div class="in-donut-svgwrap"><svg viewBox="0 0 120 120" class="in-donut-svg">' + segs
 + '<text x="60" y="62" class="in-donut-total">' + total + '</text><text x="60" y="78" class="in-donut-sub">agend.</text></svg></div>'
 + '<div class="in-donut-legend">' + legend + '</div>';
