@@ -86,6 +86,20 @@ aborta se algo falhar. **Em clone novo, ativar uma vez:** `npm run prepare`
 (ou `git config core.hooksPath .githooks`). Pular pontualmente:
 `git commit --no-verify`. Testado: bloqueia commit vermelho, libera commit verde.
 
+## Atendimento por WhatsApp (Meta Cloud API) — código pronto, falta ligar
+Implementado: aba **WhatsApp** no dashboard (inbox + chat em tempo real), duas
+Edge Functions (`supabase/functions/whatsapp-webhook` e `whatsapp-send`) e a
+migração `supabase-migration-whatsapp.sql` (tabelas `wa_conversas`/`wa_mensagens`
++ RLS + Realtime). O token do WhatsApp fica só no servidor (secrets), nunca no
+front. Enquanto não configurado, a aba mostra um aviso de setup (não quebra).
+
+### ⚠️ PASSO PENDENTE (só o usuário): seguir `WHATSAPP-SETUP.md`
+Resumo: (A) criar App/WABA na Meta e pegar WA_TOKEN, WA_PHONE_NUMBER_ID,
+WA_VERIFY_TOKEN; (B) rodar a migração SQL e pegar WA_OWNER_USER_ID; (C) `supabase
+secrets set ...` + `supabase functions deploy whatsapp-webhook --no-verify-jwt` e
+`whatsapp-send`; (D) apontar o webhook na Meta e assinar o campo `messages`.
+Regras: janela de 24h; fora dela só templates aprovados. Guia detalhado no arquivo.
+
 ## Config do ambiente
 - Modo autônomo global ligado (`~/.claude/settings.json`:
   `defaultMode: bypassPermissions`) — Claude trabalha sem pedir aprovação.
