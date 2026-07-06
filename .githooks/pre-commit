@@ -1,0 +1,15 @@
+#!/bin/sh
+# Roda a suite de testes antes de cada commit.
+# Se algum teste falhar, o commit e abortado.
+# Para pular em um commit especifico: git commit --no-verify
+
+echo "-> Rodando testes antes do commit (node test/run.js)..."
+node test/run.js
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "X Testes falharam - commit abortado."
+  echo "  Corrija os testes ou use 'git commit --no-verify' para pular."
+  exit 1
+fi
+echo "OK Testes passaram - seguindo com o commit."
+exit 0

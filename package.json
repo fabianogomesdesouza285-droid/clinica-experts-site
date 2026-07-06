@@ -4,6 +4,7 @@
   "private": true,
   "description": "Dashboard web da Clinica Experts (HTML/CSS/JS + Supabase)",
   "scripts": {
-    "test": "node test/run.js"
+    "test": "node test/run.js",
+    "prepare": "git config core.hooksPath .githooks || true"
   }
 }
