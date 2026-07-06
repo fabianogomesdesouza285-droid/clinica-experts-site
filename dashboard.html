@@ -294,6 +294,12 @@
 </div>
 
 <section class="dash-view" id="view-pacientes">
+<div class="dash-cards">
+<div class="dash-card"><span class="dash-card-label">Total de pacientes</span><span class="dash-card-value" id="pacStatTotal">0</span></div>
+<div class="dash-card"><span class="dash-card-label">Novos no mes</span><span class="dash-card-value" id="pacStatMes">0</span></div>
+<div class="dash-card"><span class="dash-card-label">Com WhatsApp</span><span class="dash-card-value" id="pacStatWhats">0</span></div>
+<div class="dash-card"><span class="dash-card-label">Aniversariantes do mes</span><span class="dash-card-value" id="pacStatAniver">0</span></div>
+</div>
 <div class="dash-panel">
 <h3>Novo paciente</h3>
 <form id="formPaciente" class="dash-form-inline">
@@ -305,8 +311,11 @@
 </form>
 </div>
 <div class="dash-panel">
-<h3>Lista de pacientes</h3>
-<div id="listPacientes" class="dash-list"><p class="dash-empty">Nenhum paciente cadastrado.</p></div>
+<div class="pac-list-head">
+<h3>Pacientes</h3>
+<div class="pac-search"><span class="pac-search-ico">&#128269;</span><input type="text" id="pacBusca" placeholder="Buscar por nome, WhatsApp ou e-mail"></div>
+</div>
+<div id="listPacientes" class="pac-list"><p class="dash-empty">Nenhum paciente cadastrado.</p></div>
 </div>
 </section>
 

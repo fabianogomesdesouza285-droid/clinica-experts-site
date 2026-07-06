@@ -10,6 +10,7 @@ var currentUserId = null;
 var profissionaisCache = [];
 var finLancamentosCache = [];
 var atendimentosCache = [];
+var pacientesCache = [];
 var inPeriodo = 'semana';
 var inRefDate = new Date();
 var finPeriodo = 'mes';
@@ -125,28 +126,81 @@ selectFiltro.appendChild(optF);
 }
 var selectAtd = document.getElementById('atdPaciente'); selectAtd.innerHTML = '<option value="">Sem paciente vinculado</option>'; list.forEach(function (p) { var opt2 = document.createElement('option'); opt2.value = p.id; opt2.textContent = p.nome; selectAtd.appendChild(opt2); });
 var selectVnd = document.getElementById('vndPaciente'); selectVnd.innerHTML = '<option value="">Sem paciente vinculado</option>'; list.forEach(function (p) { var opt3 = document.createElement('option'); opt3.value = p.id; opt3.textContent = p.nome; selectVnd.appendChild(opt3); });
+pacientesCache = list;
+var agora = new Date();
+var mesAtual = agora.getMonth(), anoAtual = agora.getFullYear();
+var novosMes = 0, comWhats = 0, aniverMes = 0;
+list.forEach(function (p) {
+if (p.criado_em) { var c = new Date(p.criado_em); if (c.getMonth() === mesAtual && c.getFullYear() === anoAtual) novosMes++; }
+if (p.whatsapp) comWhats++;
+if (p.data_nascimento) { var n = new Date(p.data_nascimento + 'T00:00:00'); if (n.getMonth() === mesAtual) aniverMes++; }
+});
+var elTot = document.getElementById('pacStatTotal'); if (elTot) elTot.textContent = list.length;
+var elMes = document.getElementById('pacStatMes'); if (elMes) elMes.textContent = novosMes;
+var elWh = document.getElementById('pacStatWhats'); if (elWh) elWh.textContent = comWhats;
+var elAn = document.getElementById('pacStatAniver'); if (elAn) elAn.textContent = aniverMes;
+renderPacientesList();
+}
+
+function pacIniciais(nome) {
+var partes = (nome || '?').trim().split(/\s+/);
+var ini = partes[0].charAt(0);
+if (partes.length > 1) ini += partes[partes.length - 1].charAt(0);
+return ini.toUpperCase();
+}
+
+function renderPacientesList() {
 var container = document.getElementById('listPacientes');
-if (list.length === 0) {
+if (!container) return;
+var termo = '';
+var elBusca = document.getElementById('pacBusca');
+if (elBusca) termo = elBusca.value.trim().toLowerCase();
+var lista = pacientesCache.filter(function (p) {
+if (!termo) return true;
+return (p.nome || '').toLowerCase().indexOf(termo) !== -1
+|| (p.whatsapp || '').toLowerCase().indexOf(termo) !== -1
+|| (p.email || '').toLowerCase().indexOf(termo) !== -1;
+});
+if (pacientesCache.length === 0) {
 container.innerHTML = '<p class="dash-empty">Nenhum paciente cadastrado.</p>';
 return;
 }
+if (lista.length === 0) {
+container.innerHTML = '<p class="dash-empty">Nenhum paciente encontrado para a busca.</p>';
+return;
+}
 container.innerHTML = '';
-list.forEach(function (p) {
+lista.forEach(function (p) {
 var row = document.createElement('div');
-row.className = 'dash-row';
+row.className = 'pac-row';
+var avatar = document.createElement('span');
+avatar.className = 'in-bar-avatar pac-avatar';
+avatar.textContent = pacIniciais(p.nome);
 var info = document.createElement('div');
-info.className = 'dash-row-info';
+info.className = 'pac-row-info';
 var title = document.createElement('span');
-title.className = 'dash-row-title';
+title.className = 'pac-row-title';
 title.textContent = p.nome;
 var sub = document.createElement('span');
-sub.className = 'dash-row-sub';
+sub.className = 'pac-row-sub';
 var subParts = [];
-if (p.whatsapp) subParts.push(p.whatsapp);
-if (p.email) subParts.push(p.email);
-sub.textContent = subParts.join(' - ');
+if (p.whatsapp) subParts.push('📱 ' + p.whatsapp);
+if (p.email) subParts.push('✉️ ' + p.email);
+if (p.data_nascimento) { var dn = new Date(p.data_nascimento + 'T00:00:00'); subParts.push('🎂 ' + dn.toLocaleDateString('pt-BR')); }
+sub.textContent = subParts.join('   ');
 info.appendChild(title);
 info.appendChild(sub);
+var acoes = document.createElement('div');
+acoes.className = 'pac-row-acoes';
+if (p.whatsapp) {
+var wa = document.createElement('a');
+wa.className = 'pac-wa-btn';
+wa.textContent = 'WhatsApp';
+wa.href = 'https://wa.me/55' + (p.whatsapp || '').replace(/\D/g, '');
+wa.target = '_blank';
+wa.rel = 'noopener';
+acoes.appendChild(wa);
+}
 var btn = document.createElement('button');
 btn.className = 'dash-del-btn';
 btn.textContent = 'Remover';
@@ -155,8 +209,10 @@ await sbAuth.from('pacientes').delete().eq('id', p.id);
 loadPacientes();
 loadAgenda();
 });
+acoes.appendChild(btn);
+row.appendChild(avatar);
 row.appendChild(info);
-row.appendChild(btn);
+row.appendChild(acoes);
 container.appendChild(row);
 });
 }
@@ -336,6 +392,8 @@ container.appendChild(row);
 });
 }
 
+var pacBuscaEl = document.getElementById('pacBusca');
+if (pacBuscaEl) pacBuscaEl.addEventListener('input', function () { renderPacientesList(); });
 document.getElementById('formPaciente').addEventListener('submit', async function (e) {
 e.preventDefault();
 var nome = document.getElementById('pacNome').value.trim();
