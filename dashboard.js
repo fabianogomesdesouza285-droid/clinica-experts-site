@@ -12,6 +12,8 @@ var finLancamentosCache = [];
 var atendimentosCache = [];
 var inPeriodo = 'semana';
 var inRefDate = new Date();
+var finPeriodo = 'mes';
+var finRefDate = new Date();
 
 function fmtMoney(v) {
 return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -248,6 +250,7 @@ document.getElementById('statSaldo').textContent = fmtMoney(mEntradas - mSaidas)
 var elEntradasMes = document.getElementById("statEntradasMes"); if (elEntradasMes) elEntradasMes.textContent = fmtMoney(mEntradas);
 var elSaidasMes = document.getElementById("statSaidasMes"); if (elSaidasMes) elSaidasMes.textContent = fmtMoney(mSaidas);
 renderInicioReports();
+renderFinanceiroCharts();
 
 var container = document.getElementById('listFinanceiro');
 if (list.length === 0) {
@@ -1357,16 +1360,17 @@ container.appendChild(row);
 }
 
 // Intervalo de datas conforme periodo/data de referencia
-function inGetRange() {
-var ref = new Date(inRefDate);
+function inGetRange(periodo, refDate) {
+periodo = periodo || inPeriodo;
+var ref = new Date(refDate || inRefDate);
 var start, end;
-if (inPeriodo === 'dia') {
+if (periodo === 'dia') {
 start = new Date(ref); start.setHours(0, 0, 0, 0);
 end = agAddDays(start, 1);
-} else if (inPeriodo === 'mes') {
+} else if (periodo === 'mes') {
 start = new Date(ref.getFullYear(), ref.getMonth(), 1);
 end = new Date(ref.getFullYear(), ref.getMonth() + 1, 1);
-} else if (inPeriodo === 'ano') {
+} else if (periodo === 'ano') {
 start = new Date(ref.getFullYear(), 0, 1);
 end = new Date(ref.getFullYear() + 1, 0, 1);
 } else {
@@ -1376,26 +1380,28 @@ end = agAddDays(start, 7);
 return { start: start, end: end };
 }
 
-function inFmtRangeLabel() {
-var r = inGetRange();
-if (inPeriodo === 'dia') return r.start.toLocaleDateString('pt-BR');
-if (inPeriodo === 'mes') { var s = r.start.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }); return s.charAt(0).toUpperCase() + s.slice(1); }
-if (inPeriodo === 'ano') return String(r.start.getFullYear());
+function inFmtRangeLabel(periodo, refDate) {
+periodo = periodo || inPeriodo;
+var r = inGetRange(periodo, refDate);
+if (periodo === 'dia') return r.start.toLocaleDateString('pt-BR');
+if (periodo === 'mes') { var s = r.start.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }); return s.charAt(0).toUpperCase() + s.slice(1); }
+if (periodo === 'ano') return String(r.start.getFullYear());
 var last = agAddDays(r.end, -1);
 return r.start.toLocaleDateString('pt-BR') + ' - ' + last.toLocaleDateString('pt-BR');
 }
 
 // Buckets: dia = blocos de 2h; semana/mes = dias; ano = meses
-function inGetBuckets() {
-var r = inGetRange();
+function inGetBuckets(periodo, refDate) {
+periodo = periodo || inPeriodo;
+var r = inGetRange(periodo, refDate);
 var buckets = [];
-if (inPeriodo === 'dia') {
+if (periodo === 'dia') {
 for (var h = 0; h < 24; h += 2) {
 var hs = new Date(r.start); hs.setHours(h, 0, 0, 0);
 var he = new Date(r.start); he.setHours(h + 2, 0, 0, 0);
 buckets.push({ key: 'h' + h, label: (h < 10 ? '0' + h : h) + 'h', start: hs, end: he });
 }
-} else if (inPeriodo === 'ano') {
+} else if (periodo === 'ano') {
 for (var m = 0; m < 12; m++) {
 var ms = new Date(r.start.getFullYear(), m, 1);
 var me = new Date(r.start.getFullYear(), m + 1, 1);
@@ -1407,7 +1413,7 @@ var cur = new Date(r.start);
 while (cur < r.end) {
 var ds = new Date(cur); ds.setHours(0, 0, 0, 0);
 var de = agAddDays(ds, 1);
-var lblD = inPeriodo === 'semana' ? ds.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '') : String(ds.getDate());
+var lblD = periodo === 'semana' ? ds.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '') : String(ds.getDate());
 buckets.push({ key: 'd' + ds.getTime(), label: lblD, start: ds, end: de });
 cur = de;
 }
@@ -1511,10 +1517,10 @@ el.appendChild(col);
 }
 
 // Fluxo de caixa: barras (entradas/saidas realizadas e previstas) + linha SVG de saldo
-function renderFluxoCaixaChart(buckets) {
-var el = document.getElementById('chartFluxoCaixa');
+function renderFluxoCaixaChart(buckets, elId, legendId) {
+var el = document.getElementById(elId || 'chartFluxoCaixa');
 if (!el) return;
-var legEl = document.getElementById('inFluxoLegend');
+var legEl = document.getElementById(legendId || 'inFluxoLegend');
 if (legEl) {
 var legItems = [['#12b76a', 'Entradas'], ['#a6e9c5', 'Entradas previstas'], ['#f04438', 'Saidas'], ['#fca5a0', 'Saidas previstas']];
 legEl.innerHTML = legItems.map(function (x) { return '<span class="in-leg-item"><span class="in-leg-box" style="background:' + x[0] + '"></span>' + x[1] + '</span>'; }).join('')
@@ -1631,3 +1637,47 @@ var inNextBtn = document.getElementById('inNext');
 if (inNextBtn) inNextBtn.addEventListener('click', function () { inShift(1); });
 var inHojeBtn = document.getElementById('inHoje');
 if (inHojeBtn) inHojeBtn.addEventListener('click', function () { inRefDate = new Date(); renderInicioReports(); });
+
+// ============================================
+// Financeiro - graficos reativos ao periodo (v9)
+// ============================================
+function renderFinanceiroCharts() {
+var lbl = document.getElementById('finRangeLabel');
+if (!lbl) return;
+lbl.textContent = inFmtRangeLabel(finPeriodo, finRefDate);
+document.querySelectorAll('.fin-periodo-tab').forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-finperiodo') === finPeriodo); });
+var range = inGetRange(finPeriodo, finRefDate);
+var buckets = inGetBuckets(finPeriodo, finRefDate);
+buckets.forEach(function (b) { b.entradaReal = 0; b.entradaPrev = 0; b.saidaReal = 0; b.saidaPrev = 0; });
+(finLancamentosCache || []).forEach(function (l) {
+var d = inParseFinDate(l);
+if (isNaN(d) || d < range.start || d >= range.end) return;
+var v = parseFloat(l.valor) || 0;
+var pend = l.status === 'pendente';
+var b = null;
+for (var i = 0; i < buckets.length; i++) { if (d >= buckets[i].start && d < buckets[i].end) { b = buckets[i]; break; } }
+if (l.tipo === 'entrada') { if (pend) { if (b) b.entradaPrev += v; } else { if (b) b.entradaReal += v; } }
+else { if (pend) { if (b) b.saidaPrev += v; } else { if (b) b.saidaReal += v; } }
+});
+renderFluxoCaixaChart(buckets, 'finChartFluxo', 'finFluxoLegend');
+var fat = buckets.map(function (b) { return { label: b.label, value: b.entradaReal, color: '#12b76a' }; });
+renderSimpleBarChart(document.getElementById('finChartFaturamento'), fat, { fmt: fmtMoney, emptyMsg: 'Sem faturamento no periodo.' });
+}
+
+function finShift(delta) {
+if (finPeriodo === 'dia') finRefDate = agAddDays(finRefDate, delta);
+else if (finPeriodo === 'semana') finRefDate = agAddDays(finRefDate, delta * 7);
+else if (finPeriodo === 'mes') finRefDate = new Date(finRefDate.getFullYear(), finRefDate.getMonth() + delta, 1);
+else finRefDate = new Date(finRefDate.getFullYear() + delta, 0, 1);
+renderFinanceiroCharts();
+}
+
+document.querySelectorAll('.fin-periodo-tab').forEach(function (t) {
+t.addEventListener('click', function () { finPeriodo = t.getAttribute('data-finperiodo'); renderFinanceiroCharts(); });
+});
+var finPrevBtn = document.getElementById('finPrev');
+if (finPrevBtn) finPrevBtn.addEventListener('click', function () { finShift(-1); });
+var finNextBtn = document.getElementById('finNext');
+if (finNextBtn) finNextBtn.addEventListener('click', function () { finShift(1); });
+var finHojeBtn = document.getElementById('finHoje');
+if (finHojeBtn) finHojeBtn.addEventListener('click', function () { finRefDate = new Date(); renderFinanceiroCharts(); });

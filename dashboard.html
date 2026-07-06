@@ -440,6 +440,37 @@
 <div class="dash-card"><span class="dash-card-label">A receber</span><span class="dash-card-value dash-green" id="finAReceber">R$ 0,00</span></div>
 <div class="dash-card"><span class="dash-card-label">A pagar</span><span class="dash-card-value dash-red" id="finAPagar">R$ 0,00</span></div>
 </div>
+<div class="dash-panel in-filtros">
+<div class="in-periodo-tabs">
+<button type="button" class="fin-periodo-tab" data-finperiodo="dia">Diaria</button>
+<button type="button" class="fin-periodo-tab" data-finperiodo="semana">Semanal</button>
+<button type="button" class="fin-periodo-tab active" data-finperiodo="mes">Mensal</button>
+<button type="button" class="fin-periodo-tab" data-finperiodo="ano">Anual</button>
+</div>
+<div class="in-range-nav">
+<button type="button" id="finHoje" class="in-hoje-btn">Hoje</button>
+<button type="button" id="finPrev" class="in-nav-btn">&lsaquo;</button>
+<span id="finRangeLabel" class="in-range-label"></span>
+<button type="button" id="finNext" class="in-nav-btn">&rsaquo;</button>
+</div>
+</div>
+<div class="in-grid-8-4">
+<div class="dash-panel">
+<div class="in-card-head">
+<h3>Fluxo de caixa</h3>
+<span class="in-info" data-tip="Entradas e saidas do periodo selecionado: barras cheias sao valores realizados e as claras sao os previstos. A linha mostra o saldo.">i</span>
+</div>
+<div id="finFluxoLegend" class="in-chart-legend"></div>
+<div id="finChartFluxo" class="in-fluxo-chart"></div>
+</div>
+<div class="dash-panel">
+<div class="in-card-head">
+<h3>Faturamento comparado</h3>
+<span class="in-info" data-tip="Entradas realizadas ao longo do periodo selecionado.">i</span>
+</div>
+<div id="finChartFaturamento" class="dash-chart"></div>
+</div>
+</div>
 <div class="dash-panel">
 <h3>Novo lancamento</h3>
 <form id="formFinanceiro" class="dash-form-inline">
