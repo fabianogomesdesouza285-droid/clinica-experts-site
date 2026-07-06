@@ -1,0 +1,9 @@
+{
+  "name": "clinica-experts-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dashboard web da Clinica Experts (HTML/CSS/JS + Supabase)",
+  "scripts": {
+    "test": "node test/run.js"
+  }
+}
