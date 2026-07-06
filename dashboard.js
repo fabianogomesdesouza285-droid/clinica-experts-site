@@ -9,6 +9,7 @@ var currentUserId = null;
 // ===== Inicio - estado dos relatorios/filtros =====
 var profissionaisCache = [];
 var finLancamentosCache = [];
+var atendimentosCache = [];
 var inPeriodo = 'semana';
 var inRefDate = new Date();
 
@@ -158,7 +159,7 @@ container.appendChild(row);
 });
 }
 
-async function loadAtendimentos() { var res = await sbAuth.from('atendimentos').select('*, pacientes(nome)').eq('user_id', currentUserId).order('data_atendimento', { ascending: false }); var list = res.data || []; var container = document.getElementById('listAtendimentos'); if (list.length === 0) { container.innerHTML = '<p class="dash-empty">Nenhum atendimento ainda.</p>'; return; } container.innerHTML = ''; list.forEach(function (a) { var row = document.createElement('div'); row.className = 'dash-row'; var info = document.createElement('div'); info.className = 'dash-row-info'; var title = document.createElement('span'); title.className = 'dash-row-title'; var pacienteNome = a.pacientes && a.pacientes.nome ? a.pacientes.nome : 'Sem paciente'; title.textContent = a.procedimento + ' - ' + pacienteNome; var sub = document.createElement('span'); sub.className = 'dash-row-sub'; var dt = new Date(a.data_atendimento); var statusLabel = a.status === 'concluido' ? 'Concluido' : (a.status === 'cancelado' ? 'Cancelado' : 'Em andamento'); sub.textContent = dt.toLocaleString('pt-BR') + (a.profissional ? ' - ' + a.profissional : '') + ' - ' + statusLabel; info.appendChild(title); info.appendChild(sub); var btn = document.createElement('button'); btn.className = 'dash-del-btn'; btn.textContent = 'Remover'; btn.addEventListener('click', async function () { await sbAuth.from('atendimentos').delete().eq('id', a.id); loadAtendimentos(); }); row.appendChild(info); row.appendChild(btn); container.appendChild(row); }); }
+async function loadAtendimentos() { var res = await sbAuth.from('atendimentos').select('*, pacientes(nome)').eq('user_id', currentUserId).order('data_atendimento', { ascending: false }); var list = res.data || []; atendimentosCache = list; renderInicioReports(); var container = document.getElementById('listAtendimentos'); if (list.length === 0) { container.innerHTML = '<p class="dash-empty">Nenhum atendimento ainda.</p>'; return; } container.innerHTML = ''; list.forEach(function (a) { var row = document.createElement('div'); row.className = 'dash-row'; var info = document.createElement('div'); info.className = 'dash-row-info'; var title = document.createElement('span'); title.className = 'dash-row-title'; var pacienteNome = a.pacientes && a.pacientes.nome ? a.pacientes.nome : 'Sem paciente'; title.textContent = a.procedimento + ' - ' + pacienteNome; var sub = document.createElement('span'); sub.className = 'dash-row-sub'; var dt = new Date(a.data_atendimento); var statusLabel = a.status === 'concluido' ? 'Concluido' : (a.status === 'cancelado' ? 'Cancelado' : 'Em andamento'); sub.textContent = dt.toLocaleString('pt-BR') + (a.profissional ? ' - ' + a.profissional : '') + ' - ' + statusLabel; info.appendChild(title); info.appendChild(sub); var btn = document.createElement('button'); btn.className = 'dash-del-btn'; btn.textContent = 'Remover'; btn.addEventListener('click', async function () { await sbAuth.from('atendimentos').delete().eq('id', a.id); loadAtendimentos(); }); row.appendChild(info); row.appendChild(btn); container.appendChild(row); }); }
 
 
 async function loadVendas() { var res = await sbAuth.from('vendas').select('*, pacientes(nome)').eq('user_id', currentUserId).order('data_venda', { ascending: false }); var list = res.data || [];var vFat = 0, vPend = 0, vPagoCount = 0; list.forEach(function (v) { var vv = parseFloat(v.valor); if (v.status === 'pago') { vFat += vv; vPagoCount++; } else if (v.status === 'pendente') { vPend += vv; } }); var elVFat = document.getElementById('vndStatFaturamento'); if (elVFat) elVFat.textContent = fmtMoney(vFat); var elVCount = document.getElementById('vndStatCount'); if (elVCount) elVCount.textContent = list.length; var elVTicket = document.getElementById('vndStatTicket'); if (elVTicket) elVTicket.textContent = fmtMoney(vPagoCount > 0 ? vFat / vPagoCount : 0); var elVPend = document.getElementById('vndStatPendente'); if (elVPend) elVPend.textContent = fmtMoney(vPend); var byProduto = {}; list.forEach(function (v) { if (v.status === 'pago') { byProduto[v.descricao] = (byProduto[v.descricao] || 0) + parseFloat(v.valor); } }); var rankProduto = Object.keys(byProduto).map(function (k) { return { nome: k, total: byProduto[k] }; }).sort(function (a, b) { return b.total - a.total; }).slice(0, 5); var contRP = document.getElementById('listVendasRankingProduto'); if (contRP) { if (rankProduto.length === 0) { contRP.innerHTML = '<p class="dash-empty">Sem dados ainda.</p>'; } else { contRP.innerHTML = ''; rankProduto.forEach(function (r) { var row = document.createElement('div'); row.className = 'dash-row'; var info = document.createElement('div'); info.className = 'dash-row-info'; var title = document.createElement('span'); title.className = 'dash-row-title'; title.textContent = r.nome; var sub = document.createElement('span'); sub.className = 'dash-row-sub'; sub.textContent = fmtMoney(r.total); info.appendChild(title); info.appendChild(sub); row.appendChild(info); contRP.appendChild(row); }); } } var byPaciente = {}; list.forEach(function (v) { if (v.status === 'pago') { var nomeP = v.pacientes && v.pacientes.nome ? v.pacientes.nome : 'Sem paciente'; byPaciente[nomeP] = (byPaciente[nomeP] || 0) + parseFloat(v.valor); } }); var rankPaciente = Object.keys(byPaciente).map(function (k) { return { nome: k, total: byPaciente[k] }; }).sort(function (a, b) { return b.total - a.total; }).slice(0, 5); var contRPac = document.getElementById('listVendasRankingPaciente'); if (contRPac) { if (rankPaciente.length === 0) { contRPac.innerHTML = '<p class="dash-empty">Sem dados ainda.</p>'; } else { contRPac.innerHTML = ''; rankPaciente.forEach(function (r) { var row = document.createElement('div'); row.className = 'dash-row'; var info = document.createElement('div'); info.className = 'dash-row-info'; var title = document.createElement('span'); title.className = 'dash-row-title'; title.textContent = r.nome; var sub = document.createElement('span'); sub.className = 'dash-row-sub'; sub.textContent = fmtMoney(r.total); info.appendChild(title); info.appendChild(sub); row.appendChild(info); contRPac.appendChild(row); }); } } var container = document.getElementById('listVendas'); if (list.length === 0) { container.innerHTML = '<p class="dash-empty">Nenhuma venda ainda.</p>'; return; } container.innerHTML = ''; list.forEach(function (v) { var row = document.createElement('div'); row.className = 'dash-row'; var info = document.createElement('div'); info.className = 'dash-row-info'; var title = document.createElement('span'); title.className = 'dash-row-title'; var pacienteNome = v.pacientes && v.pacientes.nome ? v.pacientes.nome : 'Sem paciente'; title.textContent = v.descricao + ' - ' + fmtMoney(v.valor); var sub = document.createElement('span'); sub.className = 'dash-row-sub'; var dt = new Date(v.data_venda + 'T00:00:00'); var statusLabel = v.status === 'pago' ? 'Pago' : (v.status === 'cancelado' ? 'Cancelado' : 'Pendente'); sub.textContent = dt.toLocaleDateString('pt-BR') + ' - ' + pacienteNome + ' - ' + statusLabel; info.appendChild(title); info.appendChild(sub); var btn = document.createElement('button'); btn.className = 'dash-del-btn'; btn.textContent = 'Remover'; btn.addEventListener('click', async function () { await sbAuth.from('vendas').delete().eq('id', v.id); loadVendas(); }); row.appendChild(info); row.appendChild(btn); container.appendChild(row); }); }
@@ -1452,18 +1453,18 @@ return d >= range.start && d < range.end && ev.status !== 'bloqueado';
 });
 
 renderFluxoCaixaChart(buckets);
-renderFaturamentoComparadoChart(buckets);
-renderAgPorProfissionalChart(eventos);
-renderDiasMovimentadosChart(eventos);
-renderHorariosMovimentadosChart(eventos);
+renderAgComparadosChart(buckets, eventos);
 renderStatusDonutChart(eventos);
+renderAgPorProfissionalChart(eventos);
+renderAtdFreqChart(range);
 }
 
 // Helper generico de grafico de barras (uma barra por item)
 function renderSimpleBarChart(el, items, opts) {
 if (!el) return;
 opts = opts || {};
-if (!items || items.length === 0) { el.innerHTML = '<p class="dash-empty">' + (opts.emptyMsg || 'Sem dados no periodo.') + '</p>'; return; }
+var hasData = items && items.some(function (it) { return it.value > 0; });
+if (!items || items.length === 0 || !hasData) { el.innerHTML = '<p class="dash-empty">' + (opts.emptyMsg || 'Sem dados no periodo.') + '</p>'; return; }
 var max = 1;
 items.forEach(function (it) { if (it.value > max) max = it.value; });
 el.innerHTML = '';
@@ -1532,14 +1533,33 @@ var ptsP = saldoP.map(function (v, i) { return (i + 0.5) + ',' + sy(v).toFixed(2
 var svg = '<svg class="in-fluxo-svg" viewBox="0 0 ' + n + ' 100" preserveAspectRatio="none">'
 + '<polyline class="in-fluxo-pl prev" points="' + ptsP + '"></polyline>'
 + '<polyline class="in-fluxo-pl real" points="' + ptsR + '"></polyline></svg>';
-el.innerHTML = '<div class="in-fluxo-bars">' + barsHtml + '</div>' + svg;
+el.innerHTML = '<div class="in-fluxo-plot"><div class="in-fluxo-bars">' + barsHtml + '</div>' + svg + '</div>';
 }
 
-// Faturamento comparado: uma barra por bucket (entradas realizadas)
-function renderFaturamentoComparadoChart(buckets) {
-var el = document.getElementById('chartFaturamento');
-var items = buckets.map(function (b) { return { label: b.label, value: b.entradaReal, color: '#12b76a' }; });
-renderSimpleBarChart(el, items, { fmt: fmtMoney, emptyMsg: 'Sem faturamento no periodo.' });
+// Agendamentos comparados: quantidade de agendamentos por bucket do periodo
+function renderAgComparadosChart(buckets, eventos) {
+var el = document.getElementById('chartAgComparados');
+var counts = buckets.map(function () { return 0; });
+eventos.forEach(function (ev) {
+var d = new Date(ev.data_inicio);
+for (var i = 0; i < buckets.length; i++) { if (d >= buckets[i].start && d < buckets[i].end) { counts[i]++; break; } }
+});
+var items = buckets.map(function (b, i) { return { label: b.label, value: counts[i] }; });
+renderSimpleBarChart(el, items, { showValue: true, emptyMsg: 'Nenhum agendamento no periodo.' });
+}
+
+// Atendimentos mais frequentes: top procedimentos no periodo
+function renderAtdFreqChart(range) {
+var el = document.getElementById('chartAtdFreq');
+var by = {};
+(atendimentosCache || []).forEach(function (a) {
+var d = new Date(a.data_atendimento);
+if (isNaN(d) || d < range.start || d >= range.end) return;
+var k = a.procedimento || 'Outro';
+by[k] = (by[k] || 0) + 1;
+});
+var items = Object.keys(by).map(function (k) { return { label: k, value: by[k] }; }).sort(function (a, b) { return b.value - a.value; }).slice(0, 8);
+renderSimpleBarChart(el, items, { showValue: true, emptyMsg: 'Nenhum atendimento no periodo.' });
 }
 
 // Agendamentos por profissional
@@ -1554,47 +1574,6 @@ var nome = k === 'sem' ? 'Sem prof.' : (nameOf[k] || 'Profissional');
 return { label: nome, value: byId[k], initials: inInitials(nome) };
 }).sort(function (a, b) { return b.value - a.value; });
 renderSimpleBarChart(el, items, { avatar: true, showValue: true, emptyMsg: 'Nenhum agendamento no periodo.' });
-}
-
-// Dias mais movimentados (por dia da semana)
-function renderDiasMovimentadosChart(eventos) {
-var el = document.getElementById('chartDiasMov');
-var nomes = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
-var counts = [0, 0, 0, 0, 0, 0, 0];
-eventos.forEach(function (ev) { counts[new Date(ev.data_inicio).getDay()]++; });
-var items = nomes.map(function (n, i) { return { label: n, value: counts[i] }; });
-renderSimpleBarChart(el, items, { showValue: true, emptyMsg: 'Nenhum agendamento no periodo.' });
-}
-
-// Horarios mais movimentados (heatmap horas x dias da semana)
-function renderHorariosMovimentadosChart(eventos) {
-var el = document.getElementById('chartHorariosMov');
-if (!el) return;
-if (!eventos || eventos.length === 0) { el.innerHTML = '<p class="dash-empty">Nenhum agendamento no periodo.</p>'; return; }
-var dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
-var h0 = AG_HORA_INICIO, h1 = AG_HORA_FIM;
-var grid = {}, max = 0;
-eventos.forEach(function (ev) {
-var d = new Date(ev.data_inicio); var h = d.getHours();
-if (h < h0 || h >= h1) return;
-var key = h + '-' + d.getDay();
-grid[key] = (grid[key] || 0) + 1;
-if (grid[key] > max) max = grid[key];
-});
-var html = '<div class="in-heatmap-grid" style="grid-template-columns:44px repeat(7,1fr)">';
-html += '<div class="in-heat-corner"></div>';
-dias.forEach(function (n) { html += '<div class="in-heat-head">' + n + '</div>'; });
-for (var h = h0; h < h1; h++) {
-html += '<div class="in-heat-hour">' + (h < 10 ? '0' + h : h) + 'h</div>';
-for (var dd = 0; dd < 7; dd++) {
-var c = grid[h + '-' + dd] || 0;
-var alpha = (max > 0 && c > 0) ? (0.15 + 0.85 * (c / max)) : 0;
-var bg = c > 0 ? 'rgba(23,163,152,' + alpha.toFixed(2) + ')' : 'var(--gray-100)';
-html += '<div class="in-heat-cell" style="background:' + bg + '" title="' + dias[dd] + ' ' + h + 'h: ' + c + '">' + (c > 0 ? c : '') + '</div>';
-}
-}
-html += '</div>';
-el.innerHTML = html;
 }
 
 // Status por agendamento (grafico de rosca/donut)
@@ -1619,7 +1598,7 @@ el.innerHTML = '<div class="in-donut-svgwrap"><svg viewBox="0 0 120 120" class="
 + '<div class="in-donut-legend">' + legend + '</div>';
 }
 
-// ===== Inicio - interacoes (periodo, navegacao, abas de relatorios) =====
+// ===== Inicio - interacoes (periodo e navegacao de intervalo) =====
 document.querySelectorAll('.in-periodo-tab').forEach(function (t) {
 t.addEventListener('click', function () {
 inPeriodo = t.getAttribute('data-inperiodo');
@@ -1639,13 +1618,3 @@ var inPrevBtn = document.getElementById('inPrev');
 if (inPrevBtn) inPrevBtn.addEventListener('click', function () { inShift(-1); });
 var inNextBtn = document.getElementById('inNext');
 if (inNextBtn) inNextBtn.addEventListener('click', function () { inShift(1); });
-
-document.querySelectorAll('.in-rep-tab').forEach(function (t) {
-t.addEventListener('click', function () {
-var key = t.getAttribute('data-inrep');
-document.querySelectorAll('.in-rep-tab').forEach(function (b) { b.classList.remove('active'); });
-t.classList.add('active');
-document.querySelectorAll('.in-rep-panel').forEach(function (p) { p.classList.toggle('active', p.getAttribute('data-inreppanel') === key); });
-renderInicioReports();
-});
-});

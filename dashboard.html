@@ -106,14 +106,20 @@
 <span class="dash-card-value dash-red" id="statSaidasMes">R$ 0,00</span>
 </div>
 </div>
-<div class="in-grid-2">
+<div class="in-grid-8-4">
 <div class="dash-panel">
+<div class="in-card-head">
 <h3>Fluxo de caixa</h3>
+<span class="in-info" data-tip="Entradas e saidas do periodo selecionado: barras cheias sao valores ja realizados e as claras sao os previstos. A linha mostra o saldo.">i</span>
+</div>
 <div id="inFluxoLegend" class="in-chart-legend"></div>
 <div id="chartFluxoCaixa" class="in-fluxo-chart"></div>
 </div>
 <div class="dash-panel in-balanco">
+<div class="in-card-head">
 <h3>Balanco</h3>
+<span class="in-info" data-tip="Resumo financeiro do periodo selecionado, comparando o que ja foi realizado com o total previsto.">i</span>
+</div>
 <div class="in-balanco-big">
 <span id="inBalancoSaldo">R$ 0,00</span>
 <small>de <span id="inBalancoPrev">R$ 0,00</span> previstos</small>
@@ -132,41 +138,54 @@
 </div>
 </div>
 </div>
-<div class="in-grid-2">
+<div class="in-grid-8-4">
 <div class="dash-panel">
+<div class="in-card-head">
 <h3>Agendamentos nas proximas 24h</h3>
+<span class="in-info" data-tip="Compromissos que comecam entre agora e as proximas 24 horas.">i</span>
+</div>
 <div id="listProx24h" class="dash-list"><p class="dash-empty">Sem agendamentos marcados para as proximas 24 horas.</p></div>
 </div>
 <div class="dash-panel">
+<div class="in-card-head">
 <h3>Proximos aniversariantes</h3>
+<span class="in-info" data-tip="Pacientes que fazem aniversario nos proximos 30 dias.">i</span>
+</div>
 <div id="listAniversariantesHome" class="dash-list"><p class="dash-empty">Nenhum aniversariante nos proximos dias.</p></div>
 </div>
 </div>
-<div class="dash-panel in-relatorios">
+<div class="in-relatorios-head">
 <h3>Relatorios</h3>
-<div class="in-rep-tabs">
-<button type="button" class="in-rep-tab active" data-inrep="profissional">Profissional</button>
-<button type="button" class="in-rep-tab" data-inrep="periodo">Periodo</button>
-<button type="button" class="in-rep-tab" data-inrep="status">Status</button>
-<button type="button" class="in-rep-tab" data-inrep="financeiro">Financeiro</button>
+<span class="in-info" data-tip="Indicadores dos agendamentos e atendimentos no periodo selecionado.">i</span>
 </div>
-<div class="in-rep-panel active" data-inreppanel="profissional">
-<h4>Agendamentos por profissional</h4>
-<div id="chartAgProf" class="dash-chart"></div>
+<div class="in-rep-grid">
+<div class="dash-panel in-rep-card">
+<div class="in-card-head">
+<h4>Agendamentos comparados</h4>
+<span class="in-info" data-tip="Quantidade de agendamentos ao longo do periodo selecionado.">i</span>
 </div>
-<div class="in-rep-panel" data-inreppanel="periodo">
-<h4>Dias mais movimentados</h4>
-<div id="chartDiasMov" class="dash-chart"></div>
-<h4 class="in-rep-subtitle">Horarios mais movimentados</h4>
-<div id="chartHorariosMov" class="in-heatmap"></div>
+<div id="chartAgComparados" class="dash-chart"></div>
 </div>
-<div class="in-rep-panel" data-inreppanel="status">
+<div class="dash-panel in-rep-card">
+<div class="in-card-head">
 <h4>Status por agendamento</h4>
+<span class="in-info" data-tip="Distribuicao dos agendamentos por status no periodo selecionado.">i</span>
+</div>
 <div id="chartStatusDonut" class="in-donut-wrap"></div>
 </div>
-<div class="in-rep-panel" data-inreppanel="financeiro">
-<h4>Faturamento comparado</h4>
-<div id="chartFaturamento" class="dash-chart"></div>
+<div class="dash-panel in-rep-card">
+<div class="in-card-head">
+<h4>Agendamentos por profissional</h4>
+<span class="in-info" data-tip="Quantos agendamentos cada profissional tem no periodo selecionado.">i</span>
+</div>
+<div id="chartAgProf" class="dash-chart"></div>
+</div>
+<div class="dash-panel in-rep-card">
+<div class="in-card-head">
+<h4>Atendimentos mais frequentes</h4>
+<span class="in-info" data-tip="Procedimentos mais realizados no periodo selecionado.">i</span>
+</div>
+<div id="chartAtdFreq" class="dash-chart"></div>
 </div>
 </div>
 </section>
