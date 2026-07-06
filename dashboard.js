@@ -6,6 +6,12 @@
 
 var currentUserId = null;
 
+// ===== Inicio - estado dos relatorios/filtros =====
+var profissionaisCache = [];
+var finLancamentosCache = [];
+var inPeriodo = 'semana';
+var inRefDate = new Date();
+
 function fmtMoney(v) {
 return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -198,13 +204,18 @@ var now = new Date();
 var futuros = list.filter(function (e) { return new Date(e.data_inicio) >= now && e.status !== 'bloqueado'; });
 document.getElementById('statAgendamentos').textContent = futuros.length;
 renderAgendaList(document.getElementById('listAgenda'), list);
-renderAgendaList(document.getElementById('listProximos'), futuros.slice(0, 5)); agEventosCache = list; renderAgendaCalendar();
+var limite24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+var listProx24h = list.filter(function (e) { var d = new Date(e.data_inicio); return d >= now && d < limite24h && e.status !== 'bloqueado'; });
+renderProx24h(document.getElementById('listProx24h'), listProx24h);
+agEventosCache = list; renderAgendaCalendar();
+renderInicioReports();
 }
 
 
 async function loadFinanceiro() {
 var res = await sbAuth.from('financeiro_lancamentos').select('*').eq('user_id', currentUserId).order('data_lancamento', { ascending: false });
 var list = res.data || [];
+finLancamentosCache = list;
 var entradas = 0, saidas = 0;
 list.forEach(function (l) {
 var v = parseFloat(l.valor);
@@ -235,7 +246,7 @@ if (l.tipo === 'entrada') mEntradas += v; else mSaidas += v;
 document.getElementById('statSaldo').textContent = fmtMoney(mEntradas - mSaidas);
 var elEntradasMes = document.getElementById("statEntradasMes"); if (elEntradasMes) elEntradasMes.textContent = fmtMoney(mEntradas);
 var elSaidasMes = document.getElementById("statSaidasMes"); if (elSaidasMes) elSaidasMes.textContent = fmtMoney(mSaidas);
-var chartEl = document.getElementById('chartFluxoCaixa'); if (chartEl) { var months = []; var refDate = new Date(); for (var mi = 5; mi >= 0; mi--) { var dtM = new Date(refDate.getFullYear(), refDate.getMonth() - mi, 1); months.push({ key: dtM.getFullYear() + '-' + dtM.getMonth(), label: dtM.toLocaleDateString('pt-BR', { month: 'short' }), entrada: 0, saida: 0 }); } list.forEach(function (l) { var dL = new Date(l.data_lancamento); var key = dL.getFullYear() + '-' + dL.getMonth(); var mObj = months.find(function (m) { return m.key === key; }); if (mObj) { var vL = parseFloat(l.valor); if (l.tipo === 'entrada') mObj.entrada += vL; else mObj.saida += vL; } }); var maxVal = 1; months.forEach(function (m) { if (m.entrada > maxVal) maxVal = m.entrada; if (m.saida > maxVal) maxVal = m.saida; }); chartEl.innerHTML = ''; months.forEach(function (m) { var col = document.createElement('div'); col.className = 'dash-chart-month'; var bars = document.createElement('div'); bars.className = 'dash-chart-bars'; var barE = document.createElement('div'); barE.className = 'dash-chart-bar dash-chart-bar-entrada'; barE.style.height = Math.round((m.entrada / maxVal) * 150) + 'px'; barE.title = 'Entradas: ' + fmtMoney(m.entrada); var barS = document.createElement('div'); barS.className = 'dash-chart-bar dash-chart-bar-saida'; barS.style.height = Math.round((m.saida / maxVal) * 150) + 'px'; barS.title = 'Saidas: ' + fmtMoney(m.saida); bars.appendChild(barE); bars.appendChild(barS); var lbl = document.createElement('span'); lbl.className = 'dash-chart-label'; lbl.textContent = m.label; col.appendChild(bars); col.appendChild(lbl); chartEl.appendChild(col); }); }
+renderInicioReports();
 
 var container = document.getElementById('listFinanceiro');
 if (list.length === 0) {
@@ -462,6 +473,7 @@ loadComissoes();
 async function loadProfissionais() {
 var res = await sbAuth.from('profissionais').select('*').eq('user_id', currentUserId).order('nome', { ascending: true });
 var list = res.data || [];
+profissionaisCache = list;
 var selCom = document.getElementById('comProfissional'); selCom.innerHTML = '<option value="">Sem profissional</option>'; list.forEach(function (p) { var o = document.createElement('option'); o.value = p.nome; o.textContent = p.nome; selCom.appendChild(o); });
 var selAtd = document.getElementById('atdProfissional'); selAtd.innerHTML = '<option value="">Sem profissional</option>'; list.forEach(function (p) { var o2 = document.createElement('option'); o2.value = p.nome; o2.textContent = p.nome; selAtd.appendChild(o2); });
 var selAgMod = document.getElementById('agModProfissional'); if (selAgMod) { selAgMod.innerHTML = '<option value="">Sem profissional</option>'; list.forEach(function (p) { var o3 = document.createElement('option'); o3.value = p.id; o3.textContent = p.nome; selAgMod.appendChild(o3); }); }
@@ -497,6 +509,7 @@ row.appendChild(info);
 row.appendChild(btn);
 container.appendChild(row);
 });
+renderInicioReports();
 }
 
 document.getElementById('formSala').addEventListener('submit', async function (e) {
@@ -1289,3 +1302,350 @@ loadAgenda();
 }
 
 // v7-agenda-meia-hora-modal
+
+// ============================================
+// Inicio - Relatorios e Dashboard (v8)
+// ============================================
+
+function inSetText(id, txt) { var el = document.getElementById(id); if (el) el.textContent = txt; }
+
+function inInitials(nome) {
+var parts = String(nome || '').trim().split(/\s+/).filter(Boolean);
+if (parts.length === 0) return '?';
+if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function inParseFinDate(l) {
+var s = l.data_lancamento;
+if (!s) return new Date(NaN);
+return new Date(s.length === 10 ? s + 'T00:00:00' : s);
+}
+
+// Lista das proximas 24h (somente leitura) na tela de Inicio
+function renderProx24h(container, list) {
+if (!container) return;
+if (!list || list.length === 0) {
+container.innerHTML = '<p class="dash-empty">Sem agendamentos marcados para as proximas 24 horas.</p>';
+return;
+}
+container.innerHTML = '';
+list.forEach(function (ev) {
+var row = document.createElement('div');
+row.className = 'dash-row';
+var info = document.createElement('div');
+info.className = 'dash-row-info';
+var title = document.createElement('span');
+title.className = 'dash-row-title';
+title.textContent = ev.titulo;
+var sub = document.createElement('span');
+sub.className = 'dash-row-sub';
+var dt = new Date(ev.data_inicio);
+var pacienteNome = ev.pacientes && ev.pacientes.nome ? ev.pacientes.nome : null;
+sub.textContent = dt.toLocaleString('pt-BR', { weekday: 'short', hour: '2-digit', minute: '2-digit' }) + (pacienteNome ? ' - ' + pacienteNome : '');
+info.appendChild(title);
+info.appendChild(sub);
+row.appendChild(info);
+container.appendChild(row);
+});
+}
+
+// Intervalo de datas conforme periodo/data de referencia
+function inGetRange() {
+var ref = new Date(inRefDate);
+var start, end;
+if (inPeriodo === 'dia') {
+start = new Date(ref); start.setHours(0, 0, 0, 0);
+end = agAddDays(start, 1);
+} else if (inPeriodo === 'mes') {
+start = new Date(ref.getFullYear(), ref.getMonth(), 1);
+end = new Date(ref.getFullYear(), ref.getMonth() + 1, 1);
+} else if (inPeriodo === 'ano') {
+start = new Date(ref.getFullYear(), 0, 1);
+end = new Date(ref.getFullYear() + 1, 0, 1);
+} else {
+start = agStartOfWeek(ref);
+end = agAddDays(start, 7);
+}
+return { start: start, end: end };
+}
+
+function inFmtRangeLabel() {
+var r = inGetRange();
+if (inPeriodo === 'dia') return r.start.toLocaleDateString('pt-BR');
+if (inPeriodo === 'mes') { var s = r.start.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }); return s.charAt(0).toUpperCase() + s.slice(1); }
+if (inPeriodo === 'ano') return String(r.start.getFullYear());
+var last = agAddDays(r.end, -1);
+return r.start.toLocaleDateString('pt-BR') + ' - ' + last.toLocaleDateString('pt-BR');
+}
+
+// Buckets: dia = blocos de 2h; semana/mes = dias; ano = meses
+function inGetBuckets() {
+var r = inGetRange();
+var buckets = [];
+if (inPeriodo === 'dia') {
+for (var h = 0; h < 24; h += 2) {
+var hs = new Date(r.start); hs.setHours(h, 0, 0, 0);
+var he = new Date(r.start); he.setHours(h + 2, 0, 0, 0);
+buckets.push({ key: 'h' + h, label: (h < 10 ? '0' + h : h) + 'h', start: hs, end: he });
+}
+} else if (inPeriodo === 'ano') {
+for (var m = 0; m < 12; m++) {
+var ms = new Date(r.start.getFullYear(), m, 1);
+var me = new Date(r.start.getFullYear(), m + 1, 1);
+var lblM = ms.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+buckets.push({ key: 'm' + m, label: lblM, start: ms, end: me });
+}
+} else {
+var cur = new Date(r.start);
+while (cur < r.end) {
+var ds = new Date(cur); ds.setHours(0, 0, 0, 0);
+var de = agAddDays(ds, 1);
+var lblD = inPeriodo === 'semana' ? ds.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '') : String(ds.getDate());
+buckets.push({ key: 'd' + ds.getTime(), label: lblD, start: ds, end: de });
+cur = de;
+}
+}
+return buckets;
+}
+
+// Funcao mestre: recalcula dados do periodo e dispara as sub-renderizacoes
+function renderInicioReports() {
+var lblEl = document.getElementById('inRangeLabel');
+if (!lblEl) return;
+lblEl.textContent = inFmtRangeLabel();
+document.querySelectorAll('.in-periodo-tab').forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-inperiodo') === inPeriodo); });
+
+var range = inGetRange();
+var buckets = inGetBuckets();
+buckets.forEach(function (b) { b.entradaReal = 0; b.entradaPrev = 0; b.saidaReal = 0; b.saidaPrev = 0; });
+
+var totEntR = 0, totEntP = 0, totSaiR = 0, totSaiP = 0;
+(finLancamentosCache || []).forEach(function (l) {
+var d = inParseFinDate(l);
+if (isNaN(d) || d < range.start || d >= range.end) return;
+var v = parseFloat(l.valor) || 0;
+var pendente = l.status === 'pendente';
+var b = null;
+for (var i = 0; i < buckets.length; i++) { if (d >= buckets[i].start && d < buckets[i].end) { b = buckets[i]; break; } }
+if (l.tipo === 'entrada') {
+if (pendente) { totEntP += v; if (b) b.entradaPrev += v; } else { totEntR += v; if (b) b.entradaReal += v; }
+} else {
+if (pendente) { totSaiP += v; if (b) b.saidaPrev += v; } else { totSaiR += v; if (b) b.saidaReal += v; }
+}
+});
+
+// Balanco
+var saldoReal = totEntR - totSaiR;
+var saldoPrev = (totEntR + totEntP) - (totSaiR + totSaiP);
+inSetText('inBalancoSaldo', fmtMoney(saldoReal));
+inSetText('inBalancoPrev', fmtMoney(saldoPrev));
+inSetText('inBalEntReal', fmtMoney(totEntR));
+inSetText('inBalEntPrev', 'Previsto ' + fmtMoney(totEntR + totEntP));
+inSetText('inBalSaiReal', fmtMoney(totSaiR));
+inSetText('inBalSaiPrev', 'Previsto ' + fmtMoney(totSaiR + totSaiP));
+
+// Agenda do periodo (exclui bloqueios)
+var eventos = (agEventosCache || []).filter(function (ev) {
+var d = new Date(ev.data_inicio);
+return d >= range.start && d < range.end && ev.status !== 'bloqueado';
+});
+
+renderFluxoCaixaChart(buckets);
+renderFaturamentoComparadoChart(buckets);
+renderAgPorProfissionalChart(eventos);
+renderDiasMovimentadosChart(eventos);
+renderHorariosMovimentadosChart(eventos);
+renderStatusDonutChart(eventos);
+}
+
+// Helper generico de grafico de barras (uma barra por item)
+function renderSimpleBarChart(el, items, opts) {
+if (!el) return;
+opts = opts || {};
+if (!items || items.length === 0) { el.innerHTML = '<p class="dash-empty">' + (opts.emptyMsg || 'Sem dados no periodo.') + '</p>'; return; }
+var max = 1;
+items.forEach(function (it) { if (it.value > max) max = it.value; });
+el.innerHTML = '';
+items.forEach(function (it) {
+var col = document.createElement('div');
+col.className = 'dash-chart-month';
+var bars = document.createElement('div');
+bars.className = 'dash-chart-bars';
+var bar = document.createElement('div');
+bar.className = 'dash-chart-bar';
+bar.style.height = Math.round((it.value / max) * 150) + 'px';
+bar.style.width = '22px';
+bar.style.background = it.color || opts.color || 'var(--primary)';
+bar.title = (it.label || '') + ': ' + (opts.fmt ? opts.fmt(it.value) : it.value);
+bars.appendChild(bar);
+col.appendChild(bars);
+if (opts.avatar && it.initials) {
+var av = document.createElement('div');
+av.className = 'in-bar-avatar';
+av.textContent = it.initials;
+col.appendChild(av);
+}
+var lbl = document.createElement('span');
+lbl.className = 'dash-chart-label';
+lbl.textContent = it.label || '';
+col.appendChild(lbl);
+if (opts.showValue) {
+var val = document.createElement('span');
+val.className = 'in-bar-value';
+val.textContent = opts.valueLabel ? opts.valueLabel(it.value) : String(it.value);
+col.appendChild(val);
+}
+el.appendChild(col);
+});
+}
+
+// Fluxo de caixa: barras (entradas/saidas realizadas e previstas) + linha SVG de saldo
+function renderFluxoCaixaChart(buckets) {
+var el = document.getElementById('chartFluxoCaixa');
+if (!el) return;
+var legEl = document.getElementById('inFluxoLegend');
+if (legEl) {
+var legItems = [['#12b76a', 'Entradas'], ['#a6e9c5', 'Entradas previstas'], ['#f04438', 'Saidas'], ['#fca5a0', 'Saidas previstas']];
+legEl.innerHTML = legItems.map(function (x) { return '<span class="in-leg-item"><span class="in-leg-box" style="background:' + x[0] + '"></span>' + x[1] + '</span>'; }).join('')
++ '<span class="in-leg-item"><span class="in-leg-line"></span>Saldo</span>'
++ '<span class="in-leg-item"><span class="in-leg-line dashed"></span>Saldo previsto</span>';
+}
+var maxBar = 1;
+buckets.forEach(function (b) { maxBar = Math.max(maxBar, b.entradaReal, b.entradaPrev, b.saidaReal, b.saidaPrev); });
+var saldoR = buckets.map(function (b) { return b.entradaReal - b.saidaReal; });
+var saldoP = buckets.map(function (b) { return (b.entradaReal + b.entradaPrev) - (b.saidaReal + b.saidaPrev); });
+var allS = saldoR.concat(saldoP).concat([0]);
+var maxS = Math.max.apply(null, allS), minS = Math.min.apply(null, allS);
+if (maxS === minS) { maxS += 1; minS -= 1; }
+var n = buckets.length || 1;
+function sy(v) { return (100 - ((v - minS) / (maxS - minS)) * 100); }
+function bar(h, c) { return '<div class="dash-chart-bar" style="height:' + Math.round((h / maxBar) * 150) + 'px;background:' + c + '"></div>'; }
+var barsHtml = buckets.map(function (b) {
+return '<div class="dash-chart-month"><div class="dash-chart-bars">'
++ bar(b.entradaReal, '#12b76a') + bar(b.entradaPrev, '#a6e9c5')
++ bar(b.saidaReal, '#f04438') + bar(b.saidaPrev, '#fca5a0')
++ '</div><span class="dash-chart-label">' + b.label + '</span></div>';
+}).join('');
+var ptsR = saldoR.map(function (v, i) { return (i + 0.5) + ',' + sy(v).toFixed(2); }).join(' ');
+var ptsP = saldoP.map(function (v, i) { return (i + 0.5) + ',' + sy(v).toFixed(2); }).join(' ');
+var svg = '<svg class="in-fluxo-svg" viewBox="0 0 ' + n + ' 100" preserveAspectRatio="none">'
++ '<polyline class="in-fluxo-pl prev" points="' + ptsP + '"></polyline>'
++ '<polyline class="in-fluxo-pl real" points="' + ptsR + '"></polyline></svg>';
+el.innerHTML = '<div class="in-fluxo-bars">' + barsHtml + '</div>' + svg;
+}
+
+// Faturamento comparado: uma barra por bucket (entradas realizadas)
+function renderFaturamentoComparadoChart(buckets) {
+var el = document.getElementById('chartFaturamento');
+var items = buckets.map(function (b) { return { label: b.label, value: b.entradaReal, color: '#12b76a' }; });
+renderSimpleBarChart(el, items, { fmt: fmtMoney, emptyMsg: 'Sem faturamento no periodo.' });
+}
+
+// Agendamentos por profissional
+function renderAgPorProfissionalChart(eventos) {
+var el = document.getElementById('chartAgProf');
+var byId = {};
+eventos.forEach(function (ev) { var k = ev.profissional_id || 'sem'; byId[k] = (byId[k] || 0) + 1; });
+var nameOf = {};
+(profissionaisCache || []).forEach(function (p) { nameOf[p.id] = p.nome; });
+var items = Object.keys(byId).map(function (k) {
+var nome = k === 'sem' ? 'Sem prof.' : (nameOf[k] || 'Profissional');
+return { label: nome, value: byId[k], initials: inInitials(nome) };
+}).sort(function (a, b) { return b.value - a.value; });
+renderSimpleBarChart(el, items, { avatar: true, showValue: true, emptyMsg: 'Nenhum agendamento no periodo.' });
+}
+
+// Dias mais movimentados (por dia da semana)
+function renderDiasMovimentadosChart(eventos) {
+var el = document.getElementById('chartDiasMov');
+var nomes = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+var counts = [0, 0, 0, 0, 0, 0, 0];
+eventos.forEach(function (ev) { counts[new Date(ev.data_inicio).getDay()]++; });
+var items = nomes.map(function (n, i) { return { label: n, value: counts[i] }; });
+renderSimpleBarChart(el, items, { showValue: true, emptyMsg: 'Nenhum agendamento no periodo.' });
+}
+
+// Horarios mais movimentados (heatmap horas x dias da semana)
+function renderHorariosMovimentadosChart(eventos) {
+var el = document.getElementById('chartHorariosMov');
+if (!el) return;
+if (!eventos || eventos.length === 0) { el.innerHTML = '<p class="dash-empty">Nenhum agendamento no periodo.</p>'; return; }
+var dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+var h0 = AG_HORA_INICIO, h1 = AG_HORA_FIM;
+var grid = {}, max = 0;
+eventos.forEach(function (ev) {
+var d = new Date(ev.data_inicio); var h = d.getHours();
+if (h < h0 || h >= h1) return;
+var key = h + '-' + d.getDay();
+grid[key] = (grid[key] || 0) + 1;
+if (grid[key] > max) max = grid[key];
+});
+var html = '<div class="in-heatmap-grid" style="grid-template-columns:44px repeat(7,1fr)">';
+html += '<div class="in-heat-corner"></div>';
+dias.forEach(function (n) { html += '<div class="in-heat-head">' + n + '</div>'; });
+for (var h = h0; h < h1; h++) {
+html += '<div class="in-heat-hour">' + (h < 10 ? '0' + h : h) + 'h</div>';
+for (var dd = 0; dd < 7; dd++) {
+var c = grid[h + '-' + dd] || 0;
+var alpha = (max > 0 && c > 0) ? (0.15 + 0.85 * (c / max)) : 0;
+var bg = c > 0 ? 'rgba(23,163,152,' + alpha.toFixed(2) + ')' : 'var(--gray-100)';
+html += '<div class="in-heat-cell" style="background:' + bg + '" title="' + dias[dd] + ' ' + h + 'h: ' + c + '">' + (c > 0 ? c : '') + '</div>';
+}
+}
+html += '</div>';
+el.innerHTML = html;
+}
+
+// Status por agendamento (grafico de rosca/donut)
+function renderStatusDonutChart(eventos) {
+var el = document.getElementById('chartStatusDonut');
+if (!el) return;
+var labels = { agendado: 'Agendado', confirmado: 'Confirmado', concluido: 'Concluido', cancelado: 'Cancelado', faltou: 'Faltou' };
+var colors = { agendado: '#667085', confirmado: '#17A398', concluido: '#12b76a', cancelado: '#f04438', faltou: '#f79009' };
+var counts = {}, total = 0;
+eventos.forEach(function (ev) { var s = ev.status || 'agendado'; counts[s] = (counts[s] || 0) + 1; total++; });
+if (total === 0) { el.innerHTML = '<p class="dash-empty">Nenhum agendamento no periodo.</p>'; return; }
+var order = Object.keys(labels).filter(function (k) { return counts[k]; });
+var C = 2 * Math.PI * 45, offset = 0, segs = '';
+order.forEach(function (k) {
+var len = (counts[k] / total) * C;
+segs += '<circle cx="60" cy="60" r="45" fill="none" stroke="' + colors[k] + '" stroke-width="18" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) + '" stroke-dashoffset="' + (-offset).toFixed(2) + '" transform="rotate(-90 60 60)"></circle>';
+offset += len;
+});
+var legend = order.map(function (k) { return '<div class="in-donut-leg"><span class="in-donut-dot" style="background:' + colors[k] + '"></span>' + labels[k] + ' <strong>' + counts[k] + '</strong></div>'; }).join('');
+el.innerHTML = '<div class="in-donut-svgwrap"><svg viewBox="0 0 120 120" class="in-donut-svg">' + segs
++ '<text x="60" y="62" class="in-donut-total">' + total + '</text><text x="60" y="78" class="in-donut-sub">agend.</text></svg></div>'
++ '<div class="in-donut-legend">' + legend + '</div>';
+}
+
+// ===== Inicio - interacoes (periodo, navegacao, abas de relatorios) =====
+document.querySelectorAll('.in-periodo-tab').forEach(function (t) {
+t.addEventListener('click', function () {
+inPeriodo = t.getAttribute('data-inperiodo');
+renderInicioReports();
+});
+});
+
+function inShift(delta) {
+if (inPeriodo === 'dia') inRefDate = agAddDays(inRefDate, delta);
+else if (inPeriodo === 'semana') inRefDate = agAddDays(inRefDate, delta * 7);
+else if (inPeriodo === 'mes') inRefDate = new Date(inRefDate.getFullYear(), inRefDate.getMonth() + delta, 1);
+else inRefDate = new Date(inRefDate.getFullYear() + delta, 0, 1);
+renderInicioReports();
+}
+
+var inPrevBtn = document.getElementById('inPrev');
+if (inPrevBtn) inPrevBtn.addEventListener('click', function () { inShift(-1); });
+var inNextBtn = document.getElementById('inNext');
+if (inNextBtn) inNextBtn.addEventListener('click', function () { inShift(1); });
+
+document.querySelectorAll('.in-rep-tab').forEach(function (t) {
+t.addEventListener('click', function () {
+var key = t.getAttribute('data-inrep');
+document.querySelectorAll('.in-rep-tab').forEach(function (b) { b.classList.remove('active'); });
+t.classList.add('active');
+document.querySelectorAll('.in-rep-panel').forEach(function (p) { p.classList.toggle('active', p.getAttribute('data-inreppanel') === key); });
+renderInicioReports();
+});
+});
