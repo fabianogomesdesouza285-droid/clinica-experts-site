@@ -71,6 +71,15 @@ idempotente). Cria a tabela `contas_financeiras` + campos `categoria`,
 - Usuário rodar a migração acima e conferir a tela Financeiro no ar.
 - Depois, seguir para a próxima tela/tarefa.
 
+## Testes automatizados (`npm test`)
+Rode `npm test` (ou `node test/run.js`) antes de cada deploy. O harness
+(`test/harness.js`) carrega o `dashboard.js` REAL num sandbox Node com DOM e
+Supabase falsos e valida a lógica das telas. Cobertura atual: Financeiro
+(cards, A receber/pagar, Contas auto-seed, Categorias), Pacientes (cards, busca,
+lista) e Vendas (cards, rankings) — 28 verificações. Testa lógica, não a
+renderização visual/CSS nem o Supabase real (para isso, teste no navegador).
+Para cobrir outra tela, copie um `*.test.js` e ajuste os dados/asserts.
+
 ## Config do ambiente
 - Modo autônomo global ligado (`~/.claude/settings.json`:
   `defaultMode: bypassPermissions`) — Claude trabalha sem pedir aprovação.
