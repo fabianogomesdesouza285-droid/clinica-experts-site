@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel - VigoreFlow</title>
 <link rel="icon" href="logo.png">
-<link rel="stylesheet" href="styles.css?v=4">
-<link rel="stylesheet" href="dashboard.css?v=4">
+<link rel="stylesheet" href="styles.css?v=5">
+<link rel="stylesheet" href="dashboard.css?v=5">
 </head>
 <body class="dash-body">
 
@@ -16,46 +16,46 @@
 </div>
 <nav class="dash-nav">
 <button class="dash-nav-item active" data-view="inicio">
-<span class="dash-nav-icon">HOME</span> Inicio
+<span class="dash-nav-icon">🏠</span> Inicio
 </button>
 <button class="dash-nav-item" data-view="agenda">
-<span class="dash-nav-icon">AGD</span> Agenda
+<span class="dash-nav-icon">📅</span> Agenda
 </button>
 <button class="dash-nav-item" data-view="pacientes">
-<span class="dash-nav-icon">PAC</span> Pacientes
+<span class="dash-nav-icon">👥</span> Pacientes
 </button>
 <button class="dash-nav-item" data-view="leads">
-<span class="dash-nav-icon">LED</span> Leads
+<span class="dash-nav-icon">🎯</span> Leads
 </button>
 <button class="dash-nav-item" data-view="aniversariantes">
-<span class="dash-nav-icon">BDAY</span> Aniversariantes
+<span class="dash-nav-icon">🎂</span> Aniversariantes
 </button>
 <button class="dash-nav-item" data-view="atendimentos">
-<span class="dash-nav-icon">ATD</span> Atendimentos
+<span class="dash-nav-icon">🩺</span> Atendimentos
 </button>
 <button class="dash-nav-item" data-view="vendas">
-<span class="dash-nav-icon">VND</span> Vendas
+<span class="dash-nav-icon">💰</span> Vendas
 </button>
 <button class="dash-nav-item" data-view="financeiro">
-<span class="dash-nav-icon">FIN</span> Financeiro
+<span class="dash-nav-icon">📈</span> Financeiro
 </button>
 <button class="dash-nav-item" data-view="estoque">
-<span class="dash-nav-icon">EST</span> Estoque
+<span class="dash-nav-icon">📦</span> Estoque
 </button>
 <button class="dash-nav-item" data-view="comissoes">
-<span class="dash-nav-icon">COM</span> Comissoes
+<span class="dash-nav-icon">🧾</span> Comissoes
 </button>
 <button class="dash-nav-item" data-view="profissionais">
-<span class="dash-nav-icon">PRF</span> Profissionais
+<span class="dash-nav-icon">🧑‍⚕️</span> Profissionais
 </button>
 <button class="dash-nav-item" data-view="procedimentos">
-<span class="dash-nav-icon">PRC</span> Procedimentos
+<span class="dash-nav-icon">📋</span> Procedimentos
 </button>
 <button class="dash-nav-item" data-view="assinatura">
-<span class="dash-nav-icon">ASS</span> Assinatura
+<span class="dash-nav-icon">⭐</span> Assinatura
 </button>
 <button class="dash-nav-item" data-view="config">
-<span class="dash-nav-icon">CFG</span> Configuracoes
+<span class="dash-nav-icon">⚙️</span> Configuracoes
 </button>
 </nav>
 <button id="btnLogout" class="dash-logout">Sair</button>
@@ -86,23 +86,23 @@
 </div>
 </div>
 <div class="dash-cards">
-<div class="dash-card">
+<div class="dash-card"><span class="dash-card-ico blue">👥</span>
 <span class="dash-card-label">Pacientes cadastrados</span>
 <span class="dash-card-value" id="statPacientes">0</span>
 </div>
-<div class="dash-card">
+<div class="dash-card"><span class="dash-card-ico blue">📅</span>
 <span class="dash-card-label">Agendamentos futuros</span>
 <span class="dash-card-value" id="statAgendamentos">0</span>
 </div>
-<div class="dash-card">
+<div class="dash-card"><span class="dash-card-ico">💵</span>
 <span class="dash-card-label">Saldo do mes</span>
 <span class="dash-card-value" id="statSaldo">R$ 0,00</span>
 </div>
-<div class="dash-card">
+<div class="dash-card"><span class="dash-card-ico green">📥</span>
 <span class="dash-card-label">Entradas do mes</span>
 <span class="dash-card-value dash-green" id="statEntradasMes">R$ 0,00</span>
 </div>
-<div class="dash-card">
+<div class="dash-card"><span class="dash-card-ico red">📤</span>
 <span class="dash-card-label">Saidas do mes</span>
 <span class="dash-card-value dash-red" id="statSaidasMes">R$ 0,00</span>
 </div>
@@ -295,10 +295,10 @@
 
 <section class="dash-view" id="view-pacientes">
 <div class="dash-cards">
-<div class="dash-card"><span class="dash-card-label">Total de pacientes</span><span class="dash-card-value" id="pacStatTotal">0</span></div>
-<div class="dash-card"><span class="dash-card-label">Novos no mes</span><span class="dash-card-value" id="pacStatMes">0</span></div>
-<div class="dash-card"><span class="dash-card-label">Com WhatsApp</span><span class="dash-card-value" id="pacStatWhats">0</span></div>
-<div class="dash-card"><span class="dash-card-label">Aniversariantes do mes</span><span class="dash-card-value" id="pacStatAniver">0</span></div>
+<div class="dash-card"><span class="dash-card-ico blue">👥</span><span class="dash-card-label">Total de pacientes</span><span class="dash-card-value" id="pacStatTotal">0</span></div>
+<div class="dash-card"><span class="dash-card-ico amber">✨</span><span class="dash-card-label">Novos no mes</span><span class="dash-card-value" id="pacStatMes">0</span></div>
+<div class="dash-card"><span class="dash-card-ico green">💬</span><span class="dash-card-label">Com WhatsApp</span><span class="dash-card-value" id="pacStatWhats">0</span></div>
+<div class="dash-card"><span class="dash-card-ico amber">🎂</span><span class="dash-card-label">Aniversariantes do mes</span><span class="dash-card-value" id="pacStatAniver">0</span></div>
 </div>
 <div class="dash-panel">
 <h3>Novo paciente</h3>
@@ -390,19 +390,19 @@
 </section>
 <section class="dash-view" id="view-vendas">
 <div class="dash-cards">
-<div class="dash-card">
+<div class="dash-card"><span class="dash-card-ico green">💰</span>
 <span class="dash-card-label">Faturamento</span>
 <span class="dash-card-value" id="vndStatFaturamento">R$ 0,00</span>
 </div>
-<div class="dash-card">
+<div class="dash-card"><span class="dash-card-ico">📊</span>
 <span class="dash-card-label">Vendas</span>
 <span class="dash-card-value" id="vndStatCount">0</span>
 </div>
-<div class="dash-card">
+<div class="dash-card"><span class="dash-card-ico">🎯</span>
 <span class="dash-card-label">Ticket medio</span>
 <span class="dash-card-value" id="vndStatTicket">R$ 0,00</span>
 </div>
-<div class="dash-card">
+<div class="dash-card"><span class="dash-card-ico red">⏳</span>
 <span class="dash-card-label">Valor pendente</span>
 <span class="dash-card-value" id="vndStatPendente">R$ 0,00</span>
 </div>
@@ -454,10 +454,10 @@
 </div>
 </div>
 <div class="dash-cards fin-cards-4">
-<div class="dash-card"><span class="dash-card-label">Receitas</span><span class="dash-card-value dash-green" id="finEntradas">R$ 0,00</span></div>
-<div class="dash-card"><span class="dash-card-label">Despesas</span><span class="dash-card-value dash-red" id="finSaidas">R$ 0,00</span></div>
-<div class="dash-card"><span class="dash-card-label">A receber</span><span class="dash-card-value dash-green" id="finAReceber">R$ 0,00</span></div>
-<div class="dash-card"><span class="dash-card-label">A pagar</span><span class="dash-card-value dash-red" id="finAPagar">R$ 0,00</span></div>
+<div class="dash-card"><span class="dash-card-ico green">📥</span><span class="dash-card-label">Receitas</span><span class="dash-card-value dash-green" id="finEntradas">R$ 0,00</span></div>
+<div class="dash-card"><span class="dash-card-ico red">📤</span><span class="dash-card-label">Despesas</span><span class="dash-card-value dash-red" id="finSaidas">R$ 0,00</span></div>
+<div class="dash-card"><span class="dash-card-ico green">⏳</span><span class="dash-card-label">A receber</span><span class="dash-card-value dash-green" id="finAReceber">R$ 0,00</span></div>
+<div class="dash-card"><span class="dash-card-ico red">⏳</span><span class="dash-card-label">A pagar</span><span class="dash-card-value dash-red" id="finAPagar">R$ 0,00</span></div>
 </div>
 <div class="dash-panel">
 <div class="fin-fluxo-head">
@@ -555,9 +555,9 @@
 </section>
 <section class="dash-view" id="view-comissoes">
 <div class="dash-cards">
-<div class="dash-card"><span class="dash-card-label">Comissoes em aberto</span><span class="dash-card-value dash-red" id="comAberto">R$ 0,00</span></div>
-<div class="dash-card"><span class="dash-card-label">Comissoes pagas</span><span class="dash-card-value dash-green" id="comPagas">R$ 0,00</span></div>
-<div class="dash-card"><span class="dash-card-label">Total</span><span class="dash-card-value" id="comTotal">R$ 0,00</span></div>
+<div class="dash-card"><span class="dash-card-ico red">📤</span><span class="dash-card-label">Comissoes em aberto</span><span class="dash-card-value dash-red" id="comAberto">R$ 0,00</span></div>
+<div class="dash-card"><span class="dash-card-ico green">📥</span><span class="dash-card-label">Comissoes pagas</span><span class="dash-card-value dash-green" id="comPagas">R$ 0,00</span></div>
+<div class="dash-card"><span class="dash-card-ico">📊</span><span class="dash-card-label">Total</span><span class="dash-card-value" id="comTotal">R$ 0,00</span></div>
 </div>
 <div class="dash-panel">
 <h3>Nova comissao</h3>
@@ -640,7 +640,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth.js?v=4"></script>
-<script src="dashboard.js?v=4"></script>
+<script src="auth.js?v=5"></script>
+<script src="dashboard.js?v=5"></script>
 </body>
 </html>
