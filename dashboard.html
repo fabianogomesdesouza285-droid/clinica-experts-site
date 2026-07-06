@@ -79,6 +79,7 @@
 <button type="button" class="in-periodo-tab" data-inperiodo="ano">Anual</button>
 </div>
 <div class="in-range-nav">
+<button type="button" id="inHoje" class="in-hoje-btn">Hoje</button>
 <button type="button" id="inPrev" class="in-nav-btn">&lsaquo;</button>
 <span id="inRangeLabel" class="in-range-label"></span>
 <button type="button" id="inNext" class="in-nav-btn">&rsaquo;</button>
@@ -128,11 +129,13 @@
 <div class="in-balanco-item">
 <span class="in-bal-label">Entradas</span>
 <span class="in-bal-real dash-green" id="inBalEntReal">R$ 0,00</span>
+<div class="in-bal-track"><div class="in-bal-fill green" id="inBalEntBar"></div></div>
 <span class="in-bal-prev" id="inBalEntPrev">Previsto R$ 0,00</span>
 </div>
 <div class="in-balanco-item">
 <span class="in-bal-label">Saidas</span>
 <span class="in-bal-real dash-red" id="inBalSaiReal">R$ 0,00</span>
+<div class="in-bal-track"><div class="in-bal-fill red" id="inBalSaiBar"></div></div>
 <span class="in-bal-prev" id="inBalSaiPrev">Previsto R$ 0,00</span>
 </div>
 </div>

@@ -299,6 +299,8 @@ cursor: pointer;
 .in-periodo-tab { background: transparent; border: none; padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; font-size: 13px; color: var(--gray-500); }
 .in-periodo-tab.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(23,163,152,.3); }
 .in-range-nav { display: flex; align-items: center; gap: 8px; }
+.in-hoje-btn { background: var(--primary); color: #fff; border: none; border-radius: var(--radius-sm); padding: 7px 14px; cursor: pointer; font-weight: 600; font-size: 13px; }
+.in-hoje-btn:hover { background: var(--primary-dark); }
 .in-nav-btn { background: var(--gray-100); border: 1px solid var(--border); border-radius: var(--radius-sm); width: 32px; height: 32px; cursor: pointer; font-size: 16px; color: var(--dark); }
 .in-nav-btn:hover { background: var(--border); }
 .in-range-label { font-weight: 700; color: var(--dark); min-width: 180px; text-align: center; }
@@ -341,6 +343,10 @@ cursor: pointer;
 .in-bal-label { font-weight: 700; color: var(--dark); }
 .in-bal-real { font-size: 16px; font-weight: 800; text-align: right; }
 .in-bal-prev { grid-column: 1 / -1; font-size: 12px; color: var(--gray-500); }
+.in-bal-track { grid-column: 1 / -1; height: 6px; border-radius: 4px; background: var(--gray-100); margin-top: 6px; overflow: hidden; }
+.in-bal-fill { height: 100%; border-radius: 4px; width: 0; transition: width .3s ease; }
+.in-bal-fill.green { background: #12b76a; }
+.in-bal-fill.red { background: #f04438; }
 
 /* ===== Inicio - secao e grade de Relatorios ===== */
 .in-relatorios-head { display: flex; align-items: center; gap: 8px; margin: 4px 0 -4px; }

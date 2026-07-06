@@ -1343,7 +1343,12 @@ var sub = document.createElement('span');
 sub.className = 'dash-row-sub';
 var dt = new Date(ev.data_inicio);
 var pacienteNome = ev.pacientes && ev.pacientes.nome ? ev.pacientes.nome : null;
-sub.textContent = dt.toLocaleString('pt-BR', { weekday: 'short', hour: '2-digit', minute: '2-digit' }) + (pacienteNome ? ' - ' + pacienteNome : '');
+var profNome = null;
+if (ev.profissional_id) { (profissionaisCache || []).forEach(function (p) { if (p.id === ev.profissional_id) profNome = p.nome; }); }
+var partes = [dt.toLocaleString('pt-BR', { weekday: 'short', hour: '2-digit', minute: '2-digit' })];
+if (pacienteNome) partes.push(pacienteNome);
+if (profNome) partes.push(profNome);
+sub.textContent = partes.join(' - ');
 info.appendChild(title);
 info.appendChild(sub);
 row.appendChild(info);
@@ -1445,6 +1450,10 @@ inSetText('inBalEntReal', fmtMoney(totEntR));
 inSetText('inBalEntPrev', 'Previsto ' + fmtMoney(totEntR + totEntP));
 inSetText('inBalSaiReal', fmtMoney(totSaiR));
 inSetText('inBalSaiPrev', 'Previsto ' + fmtMoney(totSaiR + totSaiP));
+var entPct = (totEntR + totEntP) > 0 ? Math.round(totEntR / (totEntR + totEntP) * 100) : 0;
+var saiPct = (totSaiR + totSaiP) > 0 ? Math.round(totSaiR / (totSaiR + totSaiP) * 100) : 0;
+var ebar = document.getElementById('inBalEntBar'); if (ebar) ebar.style.width = entPct + '%';
+var sbar = document.getElementById('inBalSaiBar'); if (sbar) sbar.style.width = saiPct + '%';
 
 // Agenda do periodo (exclui bloqueios)
 var eventos = (agEventosCache || []).filter(function (ev) {
@@ -1618,3 +1627,5 @@ var inPrevBtn = document.getElementById('inPrev');
 if (inPrevBtn) inPrevBtn.addEventListener('click', function () { inShift(-1); });
 var inNextBtn = document.getElementById('inNext');
 if (inNextBtn) inNextBtn.addEventListener('click', function () { inShift(1); });
+var inHojeBtn = document.getElementById('inHoje');
+if (inHojeBtn) inHojeBtn.addEventListener('click', function () { inRefDate = new Date(); renderInicioReports(); });
