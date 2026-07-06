@@ -71,6 +71,19 @@
 </header>
 
 <section class="dash-view active" id="view-inicio">
+<div class="dash-panel in-filtros">
+<div class="in-periodo-tabs">
+<button type="button" class="in-periodo-tab" data-inperiodo="dia">Diaria</button>
+<button type="button" class="in-periodo-tab active" data-inperiodo="semana">Semanal</button>
+<button type="button" class="in-periodo-tab" data-inperiodo="mes">Mensal</button>
+<button type="button" class="in-periodo-tab" data-inperiodo="ano">Anual</button>
+</div>
+<div class="in-range-nav">
+<button type="button" id="inPrev" class="in-nav-btn">&lsaquo;</button>
+<span id="inRangeLabel" class="in-range-label"></span>
+<button type="button" id="inNext" class="in-nav-btn">&rsaquo;</button>
+</div>
+</div>
 <div class="dash-cards">
 <div class="dash-card">
 <span class="dash-card-label">Pacientes cadastrados</span>
@@ -93,17 +106,68 @@
 <span class="dash-card-value dash-red" id="statSaidasMes">R$ 0,00</span>
 </div>
 </div>
+<div class="in-grid-2">
 <div class="dash-panel">
-<h3>Proximos agendamentos</h3>
-<div id="listProximos" class="dash-list"><p class="dash-empty">Nenhum agendamento ainda.</p></div>
+<h3>Fluxo de caixa</h3>
+<div id="inFluxoLegend" class="in-chart-legend"></div>
+<div id="chartFluxoCaixa" class="in-fluxo-chart"></div>
+</div>
+<div class="dash-panel in-balanco">
+<h3>Balanco</h3>
+<div class="in-balanco-big">
+<span id="inBalancoSaldo">R$ 0,00</span>
+<small>de <span id="inBalancoPrev">R$ 0,00</span> previstos</small>
+</div>
+<div class="in-balanco-det">
+<div class="in-balanco-item">
+<span class="in-bal-label">Entradas</span>
+<span class="in-bal-real dash-green" id="inBalEntReal">R$ 0,00</span>
+<span class="in-bal-prev" id="inBalEntPrev">Previsto R$ 0,00</span>
+</div>
+<div class="in-balanco-item">
+<span class="in-bal-label">Saidas</span>
+<span class="in-bal-real dash-red" id="inBalSaiReal">R$ 0,00</span>
+<span class="in-bal-prev" id="inBalSaiPrev">Previsto R$ 0,00</span>
+</div>
+</div>
+</div>
+</div>
+<div class="in-grid-2">
+<div class="dash-panel">
+<h3>Agendamentos nas proximas 24h</h3>
+<div id="listProx24h" class="dash-list"><p class="dash-empty">Sem agendamentos marcados para as proximas 24 horas.</p></div>
 </div>
 <div class="dash-panel">
 <h3>Proximos aniversariantes</h3>
 <div id="listAniversariantesHome" class="dash-list"><p class="dash-empty">Nenhum aniversariante nos proximos dias.</p></div>
 </div>
-<div class="dash-panel">
-<h3>Fluxo de caixa (6 meses)</h3>
-<div id="chartFluxoCaixa" class="dash-chart"></div>
+</div>
+<div class="dash-panel in-relatorios">
+<h3>Relatorios</h3>
+<div class="in-rep-tabs">
+<button type="button" class="in-rep-tab active" data-inrep="profissional">Profissional</button>
+<button type="button" class="in-rep-tab" data-inrep="periodo">Periodo</button>
+<button type="button" class="in-rep-tab" data-inrep="status">Status</button>
+<button type="button" class="in-rep-tab" data-inrep="financeiro">Financeiro</button>
+</div>
+<div class="in-rep-panel active" data-inreppanel="profissional">
+<h4>Agendamentos por profissional</h4>
+<div id="chartAgProf" class="dash-chart"></div>
+</div>
+<div class="in-rep-panel" data-inreppanel="periodo">
+<h4>Dias mais movimentados</h4>
+<div id="chartDiasMov" class="dash-chart"></div>
+<h4 class="in-rep-subtitle">Horarios mais movimentados</h4>
+<div id="chartHorariosMov" class="in-heatmap"></div>
+</div>
+<div class="in-rep-panel" data-inreppanel="status">
+<h4>Status por agendamento</h4>
+<div id="chartStatusDonut" class="in-donut-wrap"></div>
+</div>
+<div class="in-rep-panel" data-inreppanel="financeiro">
+<h4>Faturamento comparado</h4>
+<div id="chartFaturamento" class="dash-chart"></div>
+</div>
 </div>
 </section>
 
