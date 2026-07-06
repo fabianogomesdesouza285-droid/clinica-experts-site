@@ -38,10 +38,21 @@ os IDs conferidos entre HTML e JS. Falta apenas testar no navegador logado.
 - Campos `data_nascimento` e `criado_em` existem na tabela `pacientes`
   (ver `supabase-setup-app.sql`) e no formulário (`pacNascimento`).
 
+## Status: EM PRODUÇÃO (2026-07-06)
+Reforma da tela Pacientes mergeada em `main` e publicada no GitHub Pages.
+Testada no navegador logado: cards (10/10/10/1), busca, avatares, ícones e botão
+WhatsApp OK. Junto foram ao ar também as reformas de Início e Financeiro.
+
+### Cache-busting
+Assets locais no `dashboard.html` agora têm `?v=N` (`styles.css?v=2`,
+`dashboard.css?v=2`, `auth.js?v=2`, `dashboard.js?v=2`). **Ao mudar CSS/JS,
+incrementar esse número** (`?v=3`…) para o navegador baixar a versão nova.
+O `dashboard.html` em si não tem versão e é cacheado ~10 min (Pages
+`cache-control: max-age=600`) — para forçar, abrir com query nova na URL
+(`dashboard.html?novo=1`) ou "Esvaziar cache e recarregar" no DevTools.
+
 ## Próximos passos sugeridos
-1. Testar a tela no navegador logado (abrir `dashboard.html`) — conferir cards,
-   busca, botão WhatsApp e responsividade mobile com dados reais do Supabase.
-2. Se aprovar visualmente, seguir para a próxima tela/tarefa.
+- Seguir para a próxima tela/tarefa quando quiser.
 
 ## Config do ambiente
 - Modo autônomo global ligado (`~/.claude/settings.json`:
