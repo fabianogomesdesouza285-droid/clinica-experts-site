@@ -55,6 +55,7 @@ Tela `view-financeiro` reorganizada no padrão do app oficial
 (Receitas/Despesas/A receber/A pagar) → Fluxo de caixa (6 séries) → Contas
 financeiras → A receber detalhado → A pagar detalhado → Categorias (pizza).
 Commits: `14bb8a3` (blocos) e `af73f7f` (contas reais + migração). Em produção.
+**Validado no navegador pelo usuário em 2026-07-06: ficou igual à referência.**
 
 ### ⚠️ PASSO PENDENTE (só o usuário faz): migração no Supabase
 Rodar `supabase-migration-financeiro.sql` no **SQL Editor** do Supabase (é
