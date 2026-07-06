@@ -280,9 +280,10 @@ list.forEach(function (l) {
 var v = parseFloat(l.valor);
 if (l.tipo === 'entrada') entradas += v; else saidas += v;
 });
-document.getElementById('finEntradas').textContent = fmtMoney(entradas);
-document.getElementById('finSaidas').textContent = fmtMoney(saidas);
-document.getElementById('finSaldo').textContent = fmtMoney(entradas - saidas);
+function setFin(id, txt) { var e = document.getElementById(id); if (e) e.textContent = txt; }
+setFin('finEntradas', fmtMoney(entradas));
+setFin('finSaidas', saidas > 0 ? '-' + fmtMoney(saidas) : fmtMoney(0));
+setFin('finSaldo', fmtMoney(entradas - saidas));
 var aReceber = 0, aPagar = 0;
 list.forEach(function (l) {
 if (l.status === 'pendente') {
@@ -290,8 +291,11 @@ var vp = parseFloat(l.valor);
 if (l.tipo === 'entrada') aReceber += vp; else aPagar += vp;
 }
 });
-document.getElementById('finAReceber').textContent = fmtMoney(aReceber);
-document.getElementById('finAPagar').textContent = fmtMoney(aPagar);
+setFin('finAReceber', fmtMoney(aReceber));
+setFin('finAPagar', aPagar > 0 ? '-' + fmtMoney(aPagar) : fmtMoney(0));
+renderFinContas(list);
+renderFinDetalhes(list);
+renderFinCategorias();
 
 var nowD = new Date();
 var mEntradas = 0, mSaidas = 0;
@@ -1718,8 +1722,11 @@ if (l.tipo === 'entrada') { if (pend) { if (b) b.entradaPrev += v; } else { if (
 else { if (pend) { if (b) b.saidaPrev += v; } else { if (b) b.saidaReal += v; } }
 });
 renderFluxoCaixaChart(buckets, 'finChartFluxo', 'finFluxoLegend');
+var elFat = document.getElementById('finChartFaturamento');
+if (elFat) {
 var fat = buckets.map(function (b) { return { label: b.label, value: b.entradaReal, color: '#12b76a' }; });
-renderSimpleBarChart(document.getElementById('finChartFaturamento'), fat, { fmt: fmtMoney, emptyMsg: 'Sem faturamento no periodo.' });
+renderSimpleBarChart(elFat, fat, { fmt: fmtMoney, emptyMsg: 'Sem faturamento no periodo.' });
+}
 }
 
 function finShift(delta) {
@@ -1739,3 +1746,92 @@ var finNextBtn = document.getElementById('finNext');
 if (finNextBtn) finNextBtn.addEventListener('click', function () { finShift(1); });
 var finHojeBtn = document.getElementById('finHoje');
 if (finHojeBtn) finHojeBtn.addEventListener('click', function () { finRefDate = new Date(); renderFinanceiroCharts(); });
+
+// ===== Financeiro - blocos estilo referencia (Contas, A receber/pagar, Categorias) =====
+function renderFinContas(list) {
+var el = document.getElementById('finContas');
+if (!el) return;
+var ent = 0, sai = 0;
+(list || []).forEach(function (l) {
+if (l.status !== 'pendente') { var v = parseFloat(l.valor) || 0; if (l.tipo === 'entrada') ent += v; else sai += v; }
+});
+var saldo = ent - sai;
+el.innerHTML =
+'<div class="fin-conta-row"><span class="fin-conta-ico">&#127974;</span>'
++ '<span class="fin-conta-info"><span class="fin-conta-nome">Caixa</span><span class="fin-conta-sub">Saldo realizado</span></span>'
++ '<span class="fin-conta-val">' + fmtMoney(saldo) + '</span></div>'
++ '<div class="fin-conta-total"><span>Saldo total:</span><strong>' + fmtMoney(saldo) + '</strong></div>';
+}
+
+function renderFinDetalhes(list) {
+var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+var mes = hoje.getMonth(), ano = hoje.getFullYear();
+function acc(tipo) {
+var o = { atraso: 0, hoje: 0, mes: 0, ano: 0, feitoMes: 0, feitoAno: 0 };
+(list || []).forEach(function (l) {
+if (l.tipo !== tipo) return;
+var v = parseFloat(l.valor) || 0;
+var d = inParseFinDate(l); if (isNaN(d)) return;
+var dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+if (l.status === 'pendente') {
+if (dd < hoje) o.atraso += v;
+else if (dd.getTime() === hoje.getTime()) o.hoje += v;
+if (d.getMonth() === mes && d.getFullYear() === ano) o.mes += v;
+if (d.getFullYear() === ano) o.ano += v;
+} else {
+if (d.getMonth() === mes && d.getFullYear() === ano) o.feitoMes += v;
+if (d.getFullYear() === ano) o.feitoAno += v;
+}
+});
+return o;
+}
+function rows(o, defs, cls) {
+return defs.map(function (x) {
+return '<div class="fin-detail-row"><span>' + x[0] + '</span><span class="' + cls + '">' + fmtMoney(o[x[1]]) + '</span></div>';
+}).join('');
+}
+var r = acc('entrada'), p = acc('saida');
+var elR = document.getElementById('finAReceberDetalhe');
+if (elR) elR.innerHTML = rows(r, [['Inadimplencia', 'atraso'], ['Para hoje', 'hoje'], ['Para este mes', 'mes'], ['Para este ano', 'ano'], ['Recebidos no mes', 'feitoMes'], ['Recebidos no ano', 'feitoAno']], 'dash-green');
+var elP = document.getElementById('finAPagarDetalhe');
+if (elP) elP.innerHTML = rows(p, [['Em atraso', 'atraso'], ['Para hoje', 'hoje'], ['Para este mes', 'mes'], ['Para este ano', 'ano'], ['Pagos no mes', 'feitoMes'], ['Pagos no ano', 'feitoAno']], 'dash-red');
+}
+
+var finCatTipo = 'entrada';
+var FIN_CAT_COLORS = ['#12b76a', '#17A398', '#f79009', '#6172F3', '#667085', '#f04438', '#a6e9c5'];
+function renderPieChart(el, items, emptyMsg) {
+if (!el) return;
+var total = items.reduce(function (s, i) { return s + i.value; }, 0);
+if (total <= 0) { el.innerHTML = '<p class="dash-empty">' + (emptyMsg || 'Sem dados.') + '</p>'; return; }
+var C = 2 * Math.PI * 30, offset = 0, segs = '';
+items.forEach(function (it) {
+var len = (it.value / total) * C;
+segs += '<circle cx="60" cy="60" r="30" fill="none" stroke="' + it.color + '" stroke-width="60" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) + '" stroke-dashoffset="' + (-offset).toFixed(2) + '" transform="rotate(-90 60 60)"></circle>';
+offset += len;
+});
+var legend = items.map(function (it) {
+var pct = Math.round(it.value / total * 100);
+return '<div class="in-donut-leg"><span class="in-donut-dot" style="background:' + it.color + '"></span>' + it.label + ' <strong>' + fmtMoney(it.value) + '</strong> <span class="in-donut-pct">(' + pct + '%)</span></div>';
+}).join('');
+el.innerHTML = '<div class="in-donut-svgwrap"><svg viewBox="0 0 120 120" class="in-donut-svg">' + segs + '</svg></div><div class="in-donut-legend">' + legend + '</div>';
+}
+function renderFinCategorias() {
+var el = document.getElementById('finCategorias');
+if (!el) return;
+document.querySelectorAll('.fin-cat-tab').forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-fincat') === finCatTipo); });
+var by = {};
+(finLancamentosCache || []).forEach(function (l) {
+if (l.tipo !== finCatTipo) return;
+var k = (l.descricao || 'Outros').trim() || 'Outros';
+by[k] = (by[k] || 0) + (parseFloat(l.valor) || 0);
+});
+var arr = Object.keys(by).map(function (k) { return { label: k, value: by[k] }; }).sort(function (a, b) { return b.value - a.value; });
+var top = arr.slice(0, 6);
+var resto = arr.slice(6).reduce(function (s, i) { return s + i.value; }, 0);
+if (resto > 0) top.push({ label: 'Outros', value: resto });
+top.forEach(function (it, i) { it.color = FIN_CAT_COLORS[i % FIN_CAT_COLORS.length]; });
+renderPieChart(el, top, 'Sem ' + (finCatTipo === 'entrada' ? 'receitas' : 'despesas') + ' lancadas.');
+}
+document.querySelectorAll('.fin-cat-tab').forEach(function (t) {
+t.addEventListener('click', function () { finCatTipo = t.getAttribute('data-fincat'); renderFinCategorias(); });
+});

@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel - VigoreFlow</title>
 <link rel="icon" href="logo.png">
-<link rel="stylesheet" href="styles.css?v=2">
-<link rel="stylesheet" href="dashboard.css?v=2">
+<link rel="stylesheet" href="styles.css?v=3">
+<link rel="stylesheet" href="dashboard.css?v=3">
 </head>
 <body class="dash-body">
 
@@ -442,29 +442,32 @@
 </div>
 </section>
 <section class="dash-view" id="view-financeiro">
-<div class="dash-cards">
-<div class="dash-card"><span class="dash-card-label">Entradas</span><span class="dash-card-value dash-green" id="finEntradas">R$ 0,00</span></div>
-<div class="dash-card"><span class="dash-card-label">Saidas</span><span class="dash-card-value dash-red" id="finSaidas">R$ 0,00</span></div>
-<div class="dash-card"><span class="dash-card-label">Saldo</span><span class="dash-card-value" id="finSaldo">R$ 0,00</span></div>
+<div class="dash-panel fin-filtros-panel">
+<div class="fin-filtros-head">
+<span class="fin-filtros-title">Filtros</span>
+<div class="in-range-nav">
+<button type="button" id="finHoje" class="in-hoje-btn">Hoje</button>
+<button type="button" id="finPrev" class="in-nav-btn">&lsaquo;</button>
+<span class="fin-filtros-chip">Periodo: <strong id="finRangeLabel"></strong></span>
+<button type="button" id="finNext" class="in-nav-btn">&rsaquo;</button>
+</div>
+</div>
+</div>
+<div class="dash-cards fin-cards-4">
+<div class="dash-card"><span class="dash-card-label">Receitas</span><span class="dash-card-value dash-green" id="finEntradas">R$ 0,00</span></div>
+<div class="dash-card"><span class="dash-card-label">Despesas</span><span class="dash-card-value dash-red" id="finSaidas">R$ 0,00</span></div>
 <div class="dash-card"><span class="dash-card-label">A receber</span><span class="dash-card-value dash-green" id="finAReceber">R$ 0,00</span></div>
 <div class="dash-card"><span class="dash-card-label">A pagar</span><span class="dash-card-value dash-red" id="finAPagar">R$ 0,00</span></div>
 </div>
-<div class="dash-panel in-filtros">
+<div class="dash-panel">
+<div class="fin-fluxo-head">
 <div class="in-periodo-tabs">
 <button type="button" class="fin-periodo-tab" data-finperiodo="dia">Diaria</button>
 <button type="button" class="fin-periodo-tab" data-finperiodo="semana">Semanal</button>
 <button type="button" class="fin-periodo-tab active" data-finperiodo="mes">Mensal</button>
 <button type="button" class="fin-periodo-tab" data-finperiodo="ano">Anual</button>
 </div>
-<div class="in-range-nav">
-<button type="button" id="finHoje" class="in-hoje-btn">Hoje</button>
-<button type="button" id="finPrev" class="in-nav-btn">&lsaquo;</button>
-<span id="finRangeLabel" class="in-range-label"></span>
-<button type="button" id="finNext" class="in-nav-btn">&rsaquo;</button>
 </div>
-</div>
-<div class="in-grid-8-4">
-<div class="dash-panel">
 <div class="in-card-head">
 <h3>Fluxo de caixa</h3>
 <span class="in-info" data-tip="Entradas e saidas do periodo selecionado: barras cheias sao valores realizados e as claras sao os previstos. A linha mostra o saldo.">i</span>
@@ -473,12 +476,27 @@
 <div id="finChartFluxo" class="in-fluxo-chart"></div>
 </div>
 <div class="dash-panel">
+<div class="in-card-head"><h3>Contas financeiras</h3></div>
+<div id="finContas" class="fin-contas-list"></div>
+</div>
+<div class="dash-panel">
+<div class="in-card-head"><h3>A receber</h3></div>
+<div id="finAReceberDetalhe" class="fin-detail-list"></div>
+</div>
+<div class="dash-panel">
+<div class="in-card-head"><h3>A pagar</h3></div>
+<div id="finAPagarDetalhe" class="fin-detail-list"></div>
+</div>
+<div class="dash-panel">
 <div class="in-card-head">
-<h3>Faturamento comparado</h3>
-<span class="in-info" data-tip="Entradas realizadas ao longo do periodo selecionado.">i</span>
+<h3>Categorias</h3>
+<span class="in-info" data-tip="Distribuicao dos lancamentos por descricao, separados entre receitas e despesas.">i</span>
 </div>
-<div id="finChartFaturamento" class="dash-chart"></div>
+<div class="fin-cat-toggle">
+<button type="button" class="fin-cat-tab active" data-fincat="entrada">Receita</button>
+<button type="button" class="fin-cat-tab" data-fincat="saida">Despesa</button>
 </div>
+<div id="finCategorias"></div>
 </div>
 <div class="dash-panel">
 <h3>Novo lancamento</h3>
@@ -620,7 +638,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth.js?v=2"></script>
-<script src="dashboard.js?v=2"></script>
+<script src="auth.js?v=3"></script>
+<script src="dashboard.js?v=3"></script>
 </body>
 </html>

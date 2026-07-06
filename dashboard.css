@@ -393,3 +393,28 @@ cursor: pointer;
 .pac-row { flex-wrap: wrap; }
 .pac-row-sub { white-space: normal; }
 }
+
+/* ===== Financeiro - blocos estilo referencia ===== */
+.fin-filtros-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.fin-filtros-title { font-weight: 700; color: var(--dark); }
+.fin-filtros-chip { background: var(--gray-100); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 12px; font-size: 13px; color: var(--gray-700); }
+.fin-cards-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.fin-fluxo-head { display: flex; justify-content: flex-start; margin-bottom: 14px; }
+.fin-detail-list { display: flex; flex-direction: column; }
+.fin-detail-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 2px; border-bottom: 1px solid var(--border); font-size: 14px; }
+.fin-detail-row:last-child { border-bottom: none; }
+.fin-detail-row > span:last-child { font-weight: 700; }
+.fin-contas-list { display: flex; flex-direction: column; }
+.fin-conta-row { display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--border); }
+.fin-conta-ico { font-size: 20px; }
+.fin-conta-info { display: flex; flex-direction: column; flex: 1; }
+.fin-conta-nome { font-weight: 700; color: var(--dark); }
+.fin-conta-sub { font-size: 12px; color: #667085; }
+.fin-conta-val { font-weight: 700; color: var(--dark); }
+.fin-conta-total { display: flex; align-items: center; justify-content: space-between; padding: 14px 2px 2px; font-size: 15px; color: var(--dark); }
+.fin-cat-toggle { display: flex; gap: 4px; background: var(--gray-100); border-radius: var(--radius-sm); padding: 4px; max-width: 360px; margin-bottom: 18px; }
+.fin-cat-tab { flex: 1; border: none; background: transparent; padding: 9px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--gray-700); cursor: pointer; transition: background .12s, color .12s; }
+.fin-cat-tab.active { background: #12b76a; color: #fff; }
+@media (max-width: 640px) {
+.fin-cards-4 { grid-template-columns: 1fr; }
+}
