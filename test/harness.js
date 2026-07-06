@@ -79,7 +79,12 @@ function load() {
     };
     return q;
   }
-  const sbAuthMock = { from: (t) => makeQuery(t), auth: { getUser: async () => ({ data: { user: { id: 'u1' } } }) } };
+  const sbAuthMock = {
+    from: (t) => makeQuery(t),
+    auth: { getUser: async () => ({ data: { user: { id: 'u1' } } }) },
+    functions: { invoke: async () => ({ data: null, error: null }) },
+    channel: () => { const ch = { on: () => ch, subscribe: () => ch, unsubscribe: () => {} }; return ch; },
+  };
 
   const sandbox = {
     console, Math, Date, JSON, Number, String, Boolean, Array, Object, parseFloat, parseInt, isNaN, RegExp,

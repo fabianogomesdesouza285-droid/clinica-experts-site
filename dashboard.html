@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel - VigoreFlow</title>
 <link rel="icon" href="logo.png">
-<link rel="stylesheet" href="styles.css?v=5">
-<link rel="stylesheet" href="dashboard.css?v=5">
+<link rel="stylesheet" href="styles.css?v=6">
+<link rel="stylesheet" href="dashboard.css?v=6">
 </head>
 <body class="dash-body">
 
@@ -23,6 +23,9 @@
 </button>
 <button class="dash-nav-item" data-view="pacientes">
 <span class="dash-nav-icon">👥</span> Pacientes
+</button>
+<button class="dash-nav-item" data-view="whatsapp">
+<span class="dash-nav-icon">💬</span> WhatsApp
 </button>
 <button class="dash-nav-item" data-view="leads">
 <span class="dash-nav-icon">🎯</span> Leads
@@ -316,6 +319,30 @@
 <div class="pac-search"><span class="pac-search-ico">&#128269;</span><input type="text" id="pacBusca" placeholder="Buscar por nome, WhatsApp ou e-mail"></div>
 </div>
 <div id="listPacientes" class="pac-list"><p class="dash-empty">Nenhum paciente cadastrado.</p></div>
+</div>
+</section>
+
+<section class="dash-view" id="view-whatsapp">
+<div id="waSetup" class="dash-panel wa-setup" style="display:none">
+<h3>Atendimento por WhatsApp ainda nao configurado</h3>
+<p>Para ativar, rode a migracao <code>supabase-migration-whatsapp.sql</code> no Supabase e faca o deploy das Edge Functions. Passo a passo em <code>WHATSAPP-SETUP.md</code>.</p>
+</div>
+<div class="wa-wrap" id="waWrap">
+<div class="wa-list-pane">
+<div class="wa-list-head">
+<input type="text" id="waBusca" placeholder="Buscar conversa" autocomplete="off">
+<button type="button" id="waNova" class="wa-nova-btn" title="Nova conversa">+</button>
+</div>
+<div id="waConversas" class="wa-conversas"><p class="dash-empty">Sem conversas ainda.</p></div>
+</div>
+<div class="wa-chat-pane">
+<div id="waChatHead" class="wa-chat-head"><span class="wa-chat-nome">Selecione uma conversa</span><span id="waChatNum" class="wa-chat-num"></span></div>
+<div id="waChatMsgs" class="wa-chat-msgs"><p class="wa-chat-vazio">Escolha uma conversa a esquerda para comecar.</p></div>
+<form id="waChatForm" class="wa-chat-form">
+<input type="text" id="waChatInput" placeholder="Digite uma mensagem" autocomplete="off" disabled>
+<button type="submit" id="waChatSend" class="btn-dash-primary" disabled>Enviar</button>
+</form>
+</div>
 </div>
 </section>
 
@@ -640,7 +667,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth.js?v=5"></script>
-<script src="dashboard.js?v=5"></script>
+<script src="auth.js?v=6"></script>
+<script src="dashboard.js?v=6"></script>
 </body>
 </html>

@@ -843,7 +843,7 @@ document.getElementById('aniMes').addEventListener('change', loadAniversariantes
 var navItems = document.querySelectorAll('.dash-nav-item');
 var views = document.querySelectorAll('.dash-view');
 var viewTitleEl = document.getElementById('viewTitle');
-var viewTitles = { inicio: 'Inicio', agenda: 'Agenda', pacientes: 'Pacientes', atendimentos: 'Atendimentos', vendas: 'Vendas', financeiro: 'Financeiro', estoque: 'Estoque', config: 'Configuracoes' , comissoes: 'Comissoes', profissionais: 'Profissionais', procedimentos: 'Procedimentos', assinatura: 'Assinatura', leads: 'Leads', aniversariantes: 'Aniversariantes'};
+var viewTitles = { inicio: 'Inicio', agenda: 'Agenda', pacientes: 'Pacientes', whatsapp: 'Atendimento WhatsApp', atendimentos: 'Atendimentos', vendas: 'Vendas', financeiro: 'Financeiro', estoque: 'Estoque', config: 'Configuracoes' , comissoes: 'Comissoes', profissionais: 'Profissionais', procedimentos: 'Procedimentos', assinatura: 'Assinatura', leads: 'Leads', aniversariantes: 'Aniversariantes'};
 
 navItems.forEach(function (btn) {
 btn.addEventListener('click', function () {
@@ -854,6 +854,7 @@ views.forEach(function (v) { v.classList.remove('active'); });
 var target = document.getElementById('view-' + view);
 if (target) target.classList.add('active');
 viewTitleEl.textContent = viewTitles[view] || view;
+if (view === 'whatsapp' && typeof loadAtendimentoWa === 'function') loadAtendimentoWa();
 closeSidebar();
 });
 });
@@ -1901,3 +1902,148 @@ renderPieChart(el, top, 'Sem ' + (finCatTipo === 'entrada' ? 'receitas' : 'despe
 document.querySelectorAll('.fin-cat-tab').forEach(function (t) {
 t.addEventListener('click', function () { finCatTipo = t.getAttribute('data-fincat'); renderFinCategorias(); });
 });
+
+// ===== Atendimento por WhatsApp (Meta Cloud API via Edge Functions) =====
+var waConversasCache = [];
+var waConvAtual = null;
+var waRealtimeSub = null;
+
+function waFmtHora(ts) {
+try { var d = new Date(ts); return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; }
+}
+function waEscapa(s) {
+return (s == null ? '' : String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function waNomeConversa(c) { return (c.nome && c.nome.trim()) || ('+' + (c.wa_id || '')); }
+
+async function loadAtendimentoWa() {
+var wrap = document.getElementById('waWrap');
+var setup = document.getElementById('waSetup');
+var res = await sbAuth.from('wa_conversas').select('*').eq('user_id', currentUserId).order('ultima_em', { ascending: false });
+if (res && res.error) { // tabela nao existe ainda -> mostra aviso de setup
+if (setup) setup.style.display = '';
+if (wrap) wrap.style.display = 'none';
+return;
+}
+if (setup) setup.style.display = 'none';
+if (wrap) wrap.style.display = '';
+waConversasCache = res.data || [];
+renderWaConversas();
+if (!waRealtimeSub && sbAuth.channel) {
+waRealtimeSub = sbAuth.channel('wa-mensagens')
+.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'wa_mensagens' }, function (payload) { waOnNovaMensagem(payload.new); })
+.subscribe();
+}
+}
+
+function renderWaConversas() {
+var cont = document.getElementById('waConversas');
+if (!cont) return;
+var termo = '';
+var busca = document.getElementById('waBusca');
+if (busca) termo = busca.value.trim().toLowerCase();
+var lista = waConversasCache.filter(function (c) {
+if (!termo) return true;
+return waNomeConversa(c).toLowerCase().indexOf(termo) !== -1 || (c.wa_id || '').indexOf(termo) !== -1;
+});
+if (lista.length === 0) { cont.innerHTML = '<p class="dash-empty">Sem conversas ainda.</p>'; return; }
+cont.innerHTML = '';
+lista.forEach(function (c) {
+var row = document.createElement('div');
+row.className = 'wa-conv' + (waConvAtual && waConvAtual.id === c.id ? ' ativa' : '');
+var ini = waNomeConversa(c).replace('+', '').charAt(0).toUpperCase();
+var badge = c.nao_lidas > 0 ? '<span class="wa-badge">' + c.nao_lidas + '</span>' : '';
+row.innerHTML =
+'<span class="wa-conv-av">' + waEscapa(ini) + '</span>'
++ '<span class="wa-conv-body"><span class="wa-conv-top"><span class="wa-conv-nome">' + waEscapa(waNomeConversa(c)) + '</span><span class="wa-conv-hora">' + waFmtHora(c.ultima_em) + '</span></span>'
++ '<span class="wa-conv-prev">' + waEscapa(c.ultima_mensagem || '') + '</span></span>' + badge;
+row.addEventListener('click', function () { waAbrirConversa(c); });
+cont.appendChild(row);
+});
+}
+
+async function waAbrirConversa(c) {
+waConvAtual = c;
+renderWaConversas();
+var head = document.getElementById('waChatHead');
+if (head) head.innerHTML = '<span class="wa-chat-nome">' + waEscapa(waNomeConversa(c)) + '</span><span class="wa-chat-num">+' + waEscapa(c.wa_id || '') + '</span>';
+var inp = document.getElementById('waChatInput'); if (inp) { inp.disabled = false; inp.focus(); }
+var snd = document.getElementById('waChatSend'); if (snd) snd.disabled = false;
+var msgsEl = document.getElementById('waChatMsgs');
+if (msgsEl) msgsEl.innerHTML = '<p class="wa-chat-vazio">Carregando...</p>';
+var res = await sbAuth.from('wa_mensagens').select('*').eq('conversa_id', c.id).order('criado_em', { ascending: true });
+waRenderMensagens((res && res.data) || []);
+if (c.nao_lidas > 0) {
+await sbAuth.from('wa_conversas').update({ nao_lidas: 0 }).eq('id', c.id);
+c.nao_lidas = 0; renderWaConversas();
+}
+}
+
+function waRenderMensagens(msgs) {
+var el = document.getElementById('waChatMsgs');
+if (!el) return;
+if (!msgs.length) { el.innerHTML = '<p class="wa-chat-vazio">Nenhuma mensagem ainda.</p>'; return; }
+el.innerHTML = msgs.map(function (m) {
+var cls = m.direcao === 'out' ? 'wa-msg out' : 'wa-msg in';
+var st = m.direcao === 'out' ? '<span class="wa-msg-st">' + waEscapa(m.status || '') + '</span>' : '';
+return '<div class="' + cls + '"><span class="wa-msg-txt">' + waEscapa(m.texto || '') + '</span><span class="wa-msg-hora">' + waFmtHora(m.criado_em) + st + '</span></div>';
+}).join('');
+el.scrollTop = el.scrollHeight;
+}
+
+function waOnNovaMensagem(m) {
+// atualiza a lista (recarrega ordenacao/preview) e o chat se for a conversa aberta
+if (waConvAtual && m.conversa_id === waConvAtual.id) {
+var el = document.getElementById('waChatMsgs');
+if (el) {
+if (el.querySelector('.wa-chat-vazio')) el.innerHTML = '';
+var cls = m.direcao === 'out' ? 'wa-msg out' : 'wa-msg in';
+el.insertAdjacentHTML('beforeend', '<div class="' + cls + '"><span class="wa-msg-txt">' + waEscapa(m.texto || '') + '</span><span class="wa-msg-hora">' + waFmtHora(m.criado_em) + '</span></div>');
+el.scrollTop = el.scrollHeight;
+}
+}
+loadAtendimentoWa(); // atualiza previews/ordem/nao-lidas
+}
+
+async function waEnviar(texto) {
+if (!waConvAtual || !texto.trim()) return;
+var payload = waConvAtual.id
+? { conversa_id: waConvAtual.id, texto: texto.trim() }
+: { to: waConvAtual.wa_id, texto: texto.trim() };
+try {
+var r = await sbAuth.functions.invoke('whatsapp-send', { body: payload });
+if (r && r.error) throw r.error;
+if (r && r.data && r.data.conversa_id && !waConvAtual.id) waConvAtual.id = r.data.conversa_id;
+} catch (e) {
+alert('Falha ao enviar: ' + (e && e.message ? e.message : e));
+return;
+}
+var inp = document.getElementById('waChatInput'); if (inp) inp.value = '';
+await loadAtendimentoWa();
+if (waConvAtual.id) {
+var achou = waConversasCache.filter(function (c) { return c.id === waConvAtual.id; })[0];
+if (achou) waAbrirConversa(achou);
+}
+}
+
+(function wireWhatsApp() {
+var form = document.getElementById('waChatForm');
+if (form) form.addEventListener('submit', function (e) { e.preventDefault(); var inp = document.getElementById('waChatInput'); if (inp) waEnviar(inp.value); });
+var busca = document.getElementById('waBusca');
+if (busca) busca.addEventListener('input', function () { renderWaConversas(); });
+var nova = document.getElementById('waNova');
+if (nova) nova.addEventListener('click', async function () {
+var num = prompt('Numero do cliente com DDI+DDD (ex.: 5511999998888):');
+if (!num) return;
+num = num.replace(/\D/g, '');
+if (num.length < 12) { alert('Numero invalido. Use DDI+DDD+numero, ex.: 5511999998888'); return; }
+var existente = waConversasCache.filter(function (c) { return c.wa_id === num; })[0];
+if (existente) { waAbrirConversa(existente); return; }
+waConvAtual = { id: null, wa_id: num, nome: '', nao_lidas: 0 };
+var head = document.getElementById('waChatHead');
+if (head) head.innerHTML = '<span class="wa-chat-nome">+' + num + '</span><span class="wa-chat-num">nova conversa</span>';
+var msgs = document.getElementById('waChatMsgs'); if (msgs) msgs.innerHTML = '<p class="wa-chat-vazio">Envie a primeira mensagem. Obs.: fora da janela de 24h, so templates aprovados sao entregues.</p>';
+var inp = document.getElementById('waChatInput'); if (inp) { inp.disabled = false; inp.focus(); }
+var snd = document.getElementById('waChatSend'); if (snd) snd.disabled = false;
+});
+})();
