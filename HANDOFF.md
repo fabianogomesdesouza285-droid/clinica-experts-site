@@ -80,6 +80,12 @@ lista) e Vendas (cards, rankings) — 28 verificações. Testa lógica, não a
 renderização visual/CSS nem o Supabase real (para isso, teste no navegador).
 Para cobrir outra tela, copie um `*.test.js` e ajuste os dados/asserts.
 
+### Hook de pre-commit (bloqueia commit se teste falhar)
+`.githooks/pre-commit` (versionado) roda os testes antes de cada commit e
+aborta se algo falhar. **Em clone novo, ativar uma vez:** `npm run prepare`
+(ou `git config core.hooksPath .githooks`). Pular pontualmente:
+`git commit --no-verify`. Testado: bloqueia commit vermelho, libera commit verde.
+
 ## Config do ambiente
 - Modo autônomo global ligado (`~/.claude/settings.json`:
   `defaultMode: bypassPermissions`) — Claude trabalha sem pedir aprovação.
