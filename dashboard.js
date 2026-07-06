@@ -293,7 +293,7 @@ if (l.tipo === 'entrada') aReceber += vp; else aPagar += vp;
 });
 setFin('finAReceber', fmtMoney(aReceber));
 setFin('finAPagar', aPagar > 0 ? '-' + fmtMoney(aPagar) : fmtMoney(0));
-renderFinContas(list);
+loadFinContas(list);
 renderFinDetalhes(list);
 renderFinCategorias();
 
@@ -422,8 +422,15 @@ var valor = parseFloat(document.getElementById('finValor').value);
 var dataVal = document.getElementById('finData').value;
 var finStatusVal = document.getElementById('finStatus').value;
 var finVencimentoVal = document.getElementById('finVencimento').value;
+var finCategoriaEl = document.getElementById('finCategoria');
+var finContaEl = document.getElementById('finConta');
+var finCategoriaVal = finCategoriaEl ? finCategoriaEl.value.trim() : '';
+var finContaVal = finContaEl ? finContaEl.value : '';
 if (!descricao || isNaN(valor) || !dataVal) return;
-await sbAuth.from('financeiro_lancamentos').insert([{ user_id: currentUserId, tipo: tipo, descricao: descricao, valor: valor, data_lancamento: dataVal, status: finStatusVal || 'pago', vencimento: finVencimentoVal || null }]);
+var baseLanc = { user_id: currentUserId, tipo: tipo, descricao: descricao, valor: valor, data_lancamento: dataVal, status: finStatusVal || 'pago', vencimento: finVencimentoVal || null };
+var fullLanc = Object.assign({}, baseLanc, { categoria: finCategoriaVal || null, conta_id: finContaVal || null });
+var insRes = await sbAuth.from('financeiro_lancamentos').insert([fullLanc]);
+if (insRes && insRes.error) { await sbAuth.from('financeiro_lancamentos').insert([baseLanc]); }
 e.target.reset();
 loadFinanceiro();
 });
@@ -1748,7 +1755,53 @@ var finHojeBtn = document.getElementById('finHoje');
 if (finHojeBtn) finHojeBtn.addEventListener('click', function () { finRefDate = new Date(); renderFinanceiroCharts(); });
 
 // ===== Financeiro - blocos estilo referencia (Contas, A receber/pagar, Categorias) =====
-function renderFinContas(list) {
+var contasCache = [];
+var FIN_CONTA_ICO = { conta_corrente: '&#127974;', caixa: '&#129534;', poupanca: '&#128176;', outro: '&#128179;' };
+var FIN_CONTA_LBL = { conta_corrente: 'Conta Corrente', caixa: 'Caixa', poupanca: 'Poupanca', outro: 'Outro' };
+
+// Busca contas reais (tabela contas_financeiras). Se a tabela nao existir ainda
+// (migracao nao rodada), cai no modo derivado (caixa unico).
+async function loadFinContas(list) {
+var res = await sbAuth.from('contas_financeiras').select('*').eq('user_id', currentUserId).order('criado_em', { ascending: true });
+if (!res || res.error) { renderFinContasDerivado(list); return; }
+var contas = res.data || [];
+if (contas.length === 0) {
+await sbAuth.from('contas_financeiras').insert([
+{ user_id: currentUserId, nome: 'Banco padrao', tipo: 'conta_corrente', saldo_inicial: 0 },
+{ user_id: currentUserId, nome: 'Caixa', tipo: 'caixa', saldo_inicial: 0 }
+]);
+var res2 = await sbAuth.from('contas_financeiras').select('*').eq('user_id', currentUserId).order('criado_em', { ascending: true });
+contas = (res2 && res2.data) || [];
+}
+contasCache = contas;
+renderFinContasReal(contas, list);
+populateContaSelect(contas);
+}
+
+function renderFinContasReal(contas, list) {
+var el = document.getElementById('finContas');
+if (!el) return;
+if (contas.length === 0) { renderFinContasDerivado(list); return; }
+var defaultId = contas[0].id;
+var saldos = {};
+contas.forEach(function (c) { saldos[c.id] = parseFloat(c.saldo_inicial) || 0; });
+(list || []).forEach(function (l) {
+if (l.status === 'pendente') return;
+var v = (parseFloat(l.valor) || 0) * (l.tipo === 'entrada' ? 1 : -1);
+var cid = (l.conta_id && saldos[l.conta_id] !== undefined) ? l.conta_id : defaultId;
+saldos[cid] += v;
+});
+var total = 0;
+var html = contas.map(function (c) {
+var s = saldos[c.id]; total += s;
+return '<div class="fin-conta-row"><span class="fin-conta-ico">' + (FIN_CONTA_ICO[c.tipo] || FIN_CONTA_ICO.conta_corrente) + '</span>'
++ '<span class="fin-conta-info"><span class="fin-conta-nome">' + c.nome + '</span><span class="fin-conta-sub">' + (FIN_CONTA_LBL[c.tipo] || 'Conta') + '</span></span>'
++ '<span class="fin-conta-val">' + fmtMoney(s) + '</span></div>';
+}).join('');
+el.innerHTML = html + '<div class="fin-conta-total"><span>Saldo total:</span><strong>' + fmtMoney(total) + '</strong></div>';
+}
+
+function renderFinContasDerivado(list) {
 var el = document.getElementById('finContas');
 if (!el) return;
 var ent = 0, sai = 0;
@@ -1763,6 +1816,16 @@ el.innerHTML =
 + '<div class="fin-conta-total"><span>Saldo total:</span><strong>' + fmtMoney(saldo) + '</strong></div>';
 }
 
+function populateContaSelect(contas) {
+var sel = document.getElementById('finConta');
+if (!sel) return;
+var atual = sel.value;
+sel.innerHTML = '<option value="">Conta padrao</option>' + contas.map(function (c) {
+return '<option value="' + c.id + '">' + c.nome + '</option>';
+}).join('');
+if (atual) sel.value = atual;
+}
+
 function renderFinDetalhes(list) {
 var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
 var mes = hoje.getMonth(), ano = hoje.getFullYear();
@@ -1771,14 +1834,17 @@ var o = { atraso: 0, hoje: 0, mes: 0, ano: 0, feitoMes: 0, feitoAno: 0 };
 (list || []).forEach(function (l) {
 if (l.tipo !== tipo) return;
 var v = parseFloat(l.valor) || 0;
-var d = inParseFinDate(l); if (isNaN(d)) return;
-var dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
 if (l.status === 'pendente') {
-if (dd < hoje) o.atraso += v;
-else if (dd.getTime() === hoje.getTime()) o.hoje += v;
-if (d.getMonth() === mes && d.getFullYear() === ano) o.mes += v;
-if (d.getFullYear() === ano) o.ano += v;
+// pendentes: usa a data de vencimento (se houver); senao a data do lancamento
+var dv = l.vencimento ? new Date(l.vencimento + 'T00:00:00') : inParseFinDate(l);
+if (isNaN(dv)) return;
+var ddv = new Date(dv.getFullYear(), dv.getMonth(), dv.getDate());
+if (ddv < hoje) o.atraso += v;
+else if (ddv.getTime() === hoje.getTime()) o.hoje += v;
+if (dv.getMonth() === mes && dv.getFullYear() === ano) o.mes += v;
+if (dv.getFullYear() === ano) o.ano += v;
 } else {
+var d = inParseFinDate(l); if (isNaN(d)) return;
 if (d.getMonth() === mes && d.getFullYear() === ano) o.feitoMes += v;
 if (d.getFullYear() === ano) o.feitoAno += v;
 }
@@ -1822,7 +1888,7 @@ document.querySelectorAll('.fin-cat-tab').forEach(function (t) { t.classList.tog
 var by = {};
 (finLancamentosCache || []).forEach(function (l) {
 if (l.tipo !== finCatTipo) return;
-var k = (l.descricao || 'Outros').trim() || 'Outros';
+var k = ((l.categoria || l.descricao || 'Outros') + '').trim() || 'Outros';
 by[k] = (by[k] || 0) + (parseFloat(l.valor) || 0);
 });
 var arr = Object.keys(by).map(function (k) { return { label: k, value: by[k] }; }).sort(function (a, b) { return b.value - a.value; });

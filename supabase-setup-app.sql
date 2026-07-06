@@ -43,6 +43,19 @@ CREATE TABLE IF NOT EXISTS financeiro_lancamentos (
   valor DECIMAL(10,2) NOT NULL,
   data_lancamento DATE NOT NULL DEFAULT CURRENT_DATE,
   status VARCHAR(50) DEFAULT 'pago',
+  categoria VARCHAR(100),
+  vencimento DATE,
+  conta_id UUID,
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- CONTAS FINANCEIRAS (RLS/detalhes em supabase-migration-financeiro.sql)
+CREATE TABLE IF NOT EXISTS contas_financeiras (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) NOT NULL,
+  nome VARCHAR(120) NOT NULL,
+  tipo VARCHAR(40) DEFAULT 'conta_corrente',
+  saldo_inicial DECIMAL(12,2) DEFAULT 0,
   criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

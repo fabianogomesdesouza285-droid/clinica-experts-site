@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel - VigoreFlow</title>
 <link rel="icon" href="logo.png">
-<link rel="stylesheet" href="styles.css?v=3">
-<link rel="stylesheet" href="dashboard.css?v=3">
+<link rel="stylesheet" href="styles.css?v=4">
+<link rel="stylesheet" href="dashboard.css?v=4">
 </head>
 <body class="dash-body">
 
@@ -513,6 +513,8 @@
 <option value="pendente">Pendente</option>
 </select>
 <input type="date" id="finVencimento" placeholder="Vencimento">
+<input type="text" id="finCategoria" placeholder="Categoria (ex.: Servicos)">
+<select id="finConta"><option value="">Conta padrao</option></select>
 <button type="submit" class="btn-dash-primary">Adicionar</button>
 </form>
 </div>
@@ -638,7 +640,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth.js?v=3"></script>
-<script src="dashboard.js?v=3"></script>
+<script src="auth.js?v=4"></script>
+<script src="dashboard.js?v=4"></script>
 </body>
 </html>
