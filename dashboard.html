@@ -71,6 +71,20 @@
 </header>
 
 <section class="dash-view active" id="view-inicio">
+<div class="dash-panel in-filtros">
+<div class="in-periodo-tabs">
+<button type="button" class="in-periodo-tab" data-inperiodo="dia">Diaria</button>
+<button type="button" class="in-periodo-tab active" data-inperiodo="semana">Semanal</button>
+<button type="button" class="in-periodo-tab" data-inperiodo="mes">Mensal</button>
+<button type="button" class="in-periodo-tab" data-inperiodo="ano">Anual</button>
+</div>
+<div class="in-range-nav">
+<button type="button" id="inHoje" class="in-hoje-btn">Hoje</button>
+<button type="button" id="inPrev" class="in-nav-btn">&lsaquo;</button>
+<span id="inRangeLabel" class="in-range-label"></span>
+<button type="button" id="inNext" class="in-nav-btn">&rsaquo;</button>
+</div>
+</div>
 <div class="dash-cards">
 <div class="dash-card">
 <span class="dash-card-label">Pacientes cadastrados</span>
@@ -93,17 +107,89 @@
 <span class="dash-card-value dash-red" id="statSaidasMes">R$ 0,00</span>
 </div>
 </div>
+<div class="in-grid-8-4">
 <div class="dash-panel">
-<h3>Proximos agendamentos</h3>
-<div id="listProximos" class="dash-list"><p class="dash-empty">Nenhum agendamento ainda.</p></div>
+<div class="in-card-head">
+<h3>Fluxo de caixa</h3>
+<span class="in-info" data-tip="Entradas e saidas do periodo selecionado: barras cheias sao valores ja realizados e as claras sao os previstos. A linha mostra o saldo.">i</span>
+</div>
+<div id="inFluxoLegend" class="in-chart-legend"></div>
+<div id="chartFluxoCaixa" class="in-fluxo-chart"></div>
+</div>
+<div class="dash-panel in-balanco">
+<div class="in-card-head">
+<h3>Balanco</h3>
+<span class="in-info" data-tip="Resumo financeiro do periodo selecionado, comparando o que ja foi realizado com o total previsto.">i</span>
+</div>
+<div class="in-balanco-big">
+<span id="inBalancoSaldo">R$ 0,00</span>
+<small>de <span id="inBalancoPrev">R$ 0,00</span> previstos</small>
+</div>
+<div class="in-balanco-det">
+<div class="in-balanco-item">
+<span class="in-bal-label">Entradas</span>
+<span class="in-bal-real dash-green" id="inBalEntReal">R$ 0,00</span>
+<div class="in-bal-track"><div class="in-bal-fill green" id="inBalEntBar"></div></div>
+<span class="in-bal-prev" id="inBalEntPrev">Previsto R$ 0,00</span>
+</div>
+<div class="in-balanco-item">
+<span class="in-bal-label">Saidas</span>
+<span class="in-bal-real dash-red" id="inBalSaiReal">R$ 0,00</span>
+<div class="in-bal-track"><div class="in-bal-fill red" id="inBalSaiBar"></div></div>
+<span class="in-bal-prev" id="inBalSaiPrev">Previsto R$ 0,00</span>
+</div>
+</div>
+</div>
+</div>
+<div class="in-grid-8-4">
+<div class="dash-panel">
+<div class="in-card-head">
+<h3>Agendamentos nas proximas 24h</h3>
+<span class="in-info" data-tip="Compromissos que comecam entre agora e as proximas 24 horas.">i</span>
+</div>
+<div id="listProx24h" class="dash-list"><p class="dash-empty">Sem agendamentos marcados para as proximas 24 horas.</p></div>
 </div>
 <div class="dash-panel">
+<div class="in-card-head">
 <h3>Proximos aniversariantes</h3>
+<span class="in-info" data-tip="Pacientes que fazem aniversario nos proximos 30 dias.">i</span>
+</div>
 <div id="listAniversariantesHome" class="dash-list"><p class="dash-empty">Nenhum aniversariante nos proximos dias.</p></div>
 </div>
-<div class="dash-panel">
-<h3>Fluxo de caixa (6 meses)</h3>
-<div id="chartFluxoCaixa" class="dash-chart"></div>
+</div>
+<div class="in-relatorios-head">
+<h3>Relatorios</h3>
+<span class="in-info" data-tip="Indicadores dos agendamentos e atendimentos no periodo selecionado.">i</span>
+</div>
+<div class="in-rep-grid">
+<div class="dash-panel in-rep-card">
+<div class="in-card-head">
+<h4>Agendamentos comparados</h4>
+<span class="in-info" data-tip="Quantidade de agendamentos ao longo do periodo selecionado.">i</span>
+</div>
+<div id="chartAgComparados" class="dash-chart"></div>
+</div>
+<div class="dash-panel in-rep-card">
+<div class="in-card-head">
+<h4>Status por agendamento</h4>
+<span class="in-info" data-tip="Distribuicao dos agendamentos por status no periodo selecionado.">i</span>
+</div>
+<div id="chartStatusDonut" class="in-donut-wrap"></div>
+</div>
+<div class="dash-panel in-rep-card">
+<div class="in-card-head">
+<h4>Agendamentos por profissional</h4>
+<span class="in-info" data-tip="Quantos agendamentos cada profissional tem no periodo selecionado.">i</span>
+</div>
+<div id="chartAgProf" class="dash-chart"></div>
+</div>
+<div class="dash-panel in-rep-card">
+<div class="in-card-head">
+<h4>Atendimentos mais frequentes</h4>
+<span class="in-info" data-tip="Procedimentos mais realizados no periodo selecionado.">i</span>
+</div>
+<div id="chartAtdFreq" class="dash-chart"></div>
+</div>
 </div>
 </section>
 
@@ -208,6 +294,12 @@
 </div>
 
 <section class="dash-view" id="view-pacientes">
+<div class="dash-cards">
+<div class="dash-card"><span class="dash-card-label">Total de pacientes</span><span class="dash-card-value" id="pacStatTotal">0</span></div>
+<div class="dash-card"><span class="dash-card-label">Novos no mes</span><span class="dash-card-value" id="pacStatMes">0</span></div>
+<div class="dash-card"><span class="dash-card-label">Com WhatsApp</span><span class="dash-card-value" id="pacStatWhats">0</span></div>
+<div class="dash-card"><span class="dash-card-label">Aniversariantes do mes</span><span class="dash-card-value" id="pacStatAniver">0</span></div>
+</div>
 <div class="dash-panel">
 <h3>Novo paciente</h3>
 <form id="formPaciente" class="dash-form-inline">
@@ -219,8 +311,11 @@
 </form>
 </div>
 <div class="dash-panel">
-<h3>Lista de pacientes</h3>
-<div id="listPacientes" class="dash-list"><p class="dash-empty">Nenhum paciente cadastrado.</p></div>
+<div class="pac-list-head">
+<h3>Pacientes</h3>
+<div class="pac-search"><span class="pac-search-ico">&#128269;</span><input type="text" id="pacBusca" placeholder="Buscar por nome, WhatsApp ou e-mail"></div>
+</div>
+<div id="listPacientes" class="pac-list"><p class="dash-empty">Nenhum paciente cadastrado.</p></div>
 </div>
 </section>
 
@@ -353,6 +448,37 @@
 <div class="dash-card"><span class="dash-card-label">Saldo</span><span class="dash-card-value" id="finSaldo">R$ 0,00</span></div>
 <div class="dash-card"><span class="dash-card-label">A receber</span><span class="dash-card-value dash-green" id="finAReceber">R$ 0,00</span></div>
 <div class="dash-card"><span class="dash-card-label">A pagar</span><span class="dash-card-value dash-red" id="finAPagar">R$ 0,00</span></div>
+</div>
+<div class="dash-panel in-filtros">
+<div class="in-periodo-tabs">
+<button type="button" class="fin-periodo-tab" data-finperiodo="dia">Diaria</button>
+<button type="button" class="fin-periodo-tab" data-finperiodo="semana">Semanal</button>
+<button type="button" class="fin-periodo-tab active" data-finperiodo="mes">Mensal</button>
+<button type="button" class="fin-periodo-tab" data-finperiodo="ano">Anual</button>
+</div>
+<div class="in-range-nav">
+<button type="button" id="finHoje" class="in-hoje-btn">Hoje</button>
+<button type="button" id="finPrev" class="in-nav-btn">&lsaquo;</button>
+<span id="finRangeLabel" class="in-range-label"></span>
+<button type="button" id="finNext" class="in-nav-btn">&rsaquo;</button>
+</div>
+</div>
+<div class="in-grid-8-4">
+<div class="dash-panel">
+<div class="in-card-head">
+<h3>Fluxo de caixa</h3>
+<span class="in-info" data-tip="Entradas e saidas do periodo selecionado: barras cheias sao valores realizados e as claras sao os previstos. A linha mostra o saldo.">i</span>
+</div>
+<div id="finFluxoLegend" class="in-chart-legend"></div>
+<div id="finChartFluxo" class="in-fluxo-chart"></div>
+</div>
+<div class="dash-panel">
+<div class="in-card-head">
+<h3>Faturamento comparado</h3>
+<span class="in-info" data-tip="Entradas realizadas ao longo do periodo selecionado.">i</span>
+</div>
+<div id="finChartFaturamento" class="dash-chart"></div>
+</div>
 </div>
 <div class="dash-panel">
 <h3>Novo lancamento</h3>

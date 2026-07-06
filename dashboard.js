@@ -6,6 +6,16 @@
 
 var currentUserId = null;
 
+// ===== Inicio - estado dos relatorios/filtros =====
+var profissionaisCache = [];
+var finLancamentosCache = [];
+var atendimentosCache = [];
+var pacientesCache = [];
+var inPeriodo = 'semana';
+var inRefDate = new Date();
+var finPeriodo = 'mes';
+var finRefDate = new Date();
+
 function fmtMoney(v) {
 return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -116,28 +126,81 @@ selectFiltro.appendChild(optF);
 }
 var selectAtd = document.getElementById('atdPaciente'); selectAtd.innerHTML = '<option value="">Sem paciente vinculado</option>'; list.forEach(function (p) { var opt2 = document.createElement('option'); opt2.value = p.id; opt2.textContent = p.nome; selectAtd.appendChild(opt2); });
 var selectVnd = document.getElementById('vndPaciente'); selectVnd.innerHTML = '<option value="">Sem paciente vinculado</option>'; list.forEach(function (p) { var opt3 = document.createElement('option'); opt3.value = p.id; opt3.textContent = p.nome; selectVnd.appendChild(opt3); });
+pacientesCache = list;
+var agora = new Date();
+var mesAtual = agora.getMonth(), anoAtual = agora.getFullYear();
+var novosMes = 0, comWhats = 0, aniverMes = 0;
+list.forEach(function (p) {
+if (p.criado_em) { var c = new Date(p.criado_em); if (c.getMonth() === mesAtual && c.getFullYear() === anoAtual) novosMes++; }
+if (p.whatsapp) comWhats++;
+if (p.data_nascimento) { var n = new Date(p.data_nascimento + 'T00:00:00'); if (n.getMonth() === mesAtual) aniverMes++; }
+});
+var elTot = document.getElementById('pacStatTotal'); if (elTot) elTot.textContent = list.length;
+var elMes = document.getElementById('pacStatMes'); if (elMes) elMes.textContent = novosMes;
+var elWh = document.getElementById('pacStatWhats'); if (elWh) elWh.textContent = comWhats;
+var elAn = document.getElementById('pacStatAniver'); if (elAn) elAn.textContent = aniverMes;
+renderPacientesList();
+}
+
+function pacIniciais(nome) {
+var partes = (nome || '?').trim().split(/\s+/);
+var ini = partes[0].charAt(0);
+if (partes.length > 1) ini += partes[partes.length - 1].charAt(0);
+return ini.toUpperCase();
+}
+
+function renderPacientesList() {
 var container = document.getElementById('listPacientes');
-if (list.length === 0) {
+if (!container) return;
+var termo = '';
+var elBusca = document.getElementById('pacBusca');
+if (elBusca) termo = elBusca.value.trim().toLowerCase();
+var lista = pacientesCache.filter(function (p) {
+if (!termo) return true;
+return (p.nome || '').toLowerCase().indexOf(termo) !== -1
+|| (p.whatsapp || '').toLowerCase().indexOf(termo) !== -1
+|| (p.email || '').toLowerCase().indexOf(termo) !== -1;
+});
+if (pacientesCache.length === 0) {
 container.innerHTML = '<p class="dash-empty">Nenhum paciente cadastrado.</p>';
 return;
 }
+if (lista.length === 0) {
+container.innerHTML = '<p class="dash-empty">Nenhum paciente encontrado para a busca.</p>';
+return;
+}
 container.innerHTML = '';
-list.forEach(function (p) {
+lista.forEach(function (p) {
 var row = document.createElement('div');
-row.className = 'dash-row';
+row.className = 'pac-row';
+var avatar = document.createElement('span');
+avatar.className = 'in-bar-avatar pac-avatar';
+avatar.textContent = pacIniciais(p.nome);
 var info = document.createElement('div');
-info.className = 'dash-row-info';
+info.className = 'pac-row-info';
 var title = document.createElement('span');
-title.className = 'dash-row-title';
+title.className = 'pac-row-title';
 title.textContent = p.nome;
 var sub = document.createElement('span');
-sub.className = 'dash-row-sub';
+sub.className = 'pac-row-sub';
 var subParts = [];
-if (p.whatsapp) subParts.push(p.whatsapp);
-if (p.email) subParts.push(p.email);
-sub.textContent = subParts.join(' - ');
+if (p.whatsapp) subParts.push('📱 ' + p.whatsapp);
+if (p.email) subParts.push('✉️ ' + p.email);
+if (p.data_nascimento) { var dn = new Date(p.data_nascimento + 'T00:00:00'); subParts.push('🎂 ' + dn.toLocaleDateString('pt-BR')); }
+sub.textContent = subParts.join('   ');
 info.appendChild(title);
 info.appendChild(sub);
+var acoes = document.createElement('div');
+acoes.className = 'pac-row-acoes';
+if (p.whatsapp) {
+var wa = document.createElement('a');
+wa.className = 'pac-wa-btn';
+wa.textContent = 'WhatsApp';
+wa.href = 'https://wa.me/55' + (p.whatsapp || '').replace(/\D/g, '');
+wa.target = '_blank';
+wa.rel = 'noopener';
+acoes.appendChild(wa);
+}
 var btn = document.createElement('button');
 btn.className = 'dash-del-btn';
 btn.textContent = 'Remover';
@@ -146,13 +209,15 @@ await sbAuth.from('pacientes').delete().eq('id', p.id);
 loadPacientes();
 loadAgenda();
 });
+acoes.appendChild(btn);
+row.appendChild(avatar);
 row.appendChild(info);
-row.appendChild(btn);
+row.appendChild(acoes);
 container.appendChild(row);
 });
 }
 
-async function loadAtendimentos() { var res = await sbAuth.from('atendimentos').select('*, pacientes(nome)').eq('user_id', currentUserId).order('data_atendimento', { ascending: false }); var list = res.data || []; var container = document.getElementById('listAtendimentos'); if (list.length === 0) { container.innerHTML = '<p class="dash-empty">Nenhum atendimento ainda.</p>'; return; } container.innerHTML = ''; list.forEach(function (a) { var row = document.createElement('div'); row.className = 'dash-row'; var info = document.createElement('div'); info.className = 'dash-row-info'; var title = document.createElement('span'); title.className = 'dash-row-title'; var pacienteNome = a.pacientes && a.pacientes.nome ? a.pacientes.nome : 'Sem paciente'; title.textContent = a.procedimento + ' - ' + pacienteNome; var sub = document.createElement('span'); sub.className = 'dash-row-sub'; var dt = new Date(a.data_atendimento); var statusLabel = a.status === 'concluido' ? 'Concluido' : (a.status === 'cancelado' ? 'Cancelado' : 'Em andamento'); sub.textContent = dt.toLocaleString('pt-BR') + (a.profissional ? ' - ' + a.profissional : '') + ' - ' + statusLabel; info.appendChild(title); info.appendChild(sub); var btn = document.createElement('button'); btn.className = 'dash-del-btn'; btn.textContent = 'Remover'; btn.addEventListener('click', async function () { await sbAuth.from('atendimentos').delete().eq('id', a.id); loadAtendimentos(); }); row.appendChild(info); row.appendChild(btn); container.appendChild(row); }); }
+async function loadAtendimentos() { var res = await sbAuth.from('atendimentos').select('*, pacientes(nome)').eq('user_id', currentUserId).order('data_atendimento', { ascending: false }); var list = res.data || []; atendimentosCache = list; renderInicioReports(); var container = document.getElementById('listAtendimentos'); if (list.length === 0) { container.innerHTML = '<p class="dash-empty">Nenhum atendimento ainda.</p>'; return; } container.innerHTML = ''; list.forEach(function (a) { var row = document.createElement('div'); row.className = 'dash-row'; var info = document.createElement('div'); info.className = 'dash-row-info'; var title = document.createElement('span'); title.className = 'dash-row-title'; var pacienteNome = a.pacientes && a.pacientes.nome ? a.pacientes.nome : 'Sem paciente'; title.textContent = a.procedimento + ' - ' + pacienteNome; var sub = document.createElement('span'); sub.className = 'dash-row-sub'; var dt = new Date(a.data_atendimento); var statusLabel = a.status === 'concluido' ? 'Concluido' : (a.status === 'cancelado' ? 'Cancelado' : 'Em andamento'); sub.textContent = dt.toLocaleString('pt-BR') + (a.profissional ? ' - ' + a.profissional : '') + ' - ' + statusLabel; info.appendChild(title); info.appendChild(sub); var btn = document.createElement('button'); btn.className = 'dash-del-btn'; btn.textContent = 'Remover'; btn.addEventListener('click', async function () { await sbAuth.from('atendimentos').delete().eq('id', a.id); loadAtendimentos(); }); row.appendChild(info); row.appendChild(btn); container.appendChild(row); }); }
 
 
 async function loadVendas() { var res = await sbAuth.from('vendas').select('*, pacientes(nome)').eq('user_id', currentUserId).order('data_venda', { ascending: false }); var list = res.data || [];var vFat = 0, vPend = 0, vPagoCount = 0; list.forEach(function (v) { var vv = parseFloat(v.valor); if (v.status === 'pago') { vFat += vv; vPagoCount++; } else if (v.status === 'pendente') { vPend += vv; } }); var elVFat = document.getElementById('vndStatFaturamento'); if (elVFat) elVFat.textContent = fmtMoney(vFat); var elVCount = document.getElementById('vndStatCount'); if (elVCount) elVCount.textContent = list.length; var elVTicket = document.getElementById('vndStatTicket'); if (elVTicket) elVTicket.textContent = fmtMoney(vPagoCount > 0 ? vFat / vPagoCount : 0); var elVPend = document.getElementById('vndStatPendente'); if (elVPend) elVPend.textContent = fmtMoney(vPend); var byProduto = {}; list.forEach(function (v) { if (v.status === 'pago') { byProduto[v.descricao] = (byProduto[v.descricao] || 0) + parseFloat(v.valor); } }); var rankProduto = Object.keys(byProduto).map(function (k) { return { nome: k, total: byProduto[k] }; }).sort(function (a, b) { return b.total - a.total; }).slice(0, 5); var contRP = document.getElementById('listVendasRankingProduto'); if (contRP) { if (rankProduto.length === 0) { contRP.innerHTML = '<p class="dash-empty">Sem dados ainda.</p>'; } else { contRP.innerHTML = ''; rankProduto.forEach(function (r) { var row = document.createElement('div'); row.className = 'dash-row'; var info = document.createElement('div'); info.className = 'dash-row-info'; var title = document.createElement('span'); title.className = 'dash-row-title'; title.textContent = r.nome; var sub = document.createElement('span'); sub.className = 'dash-row-sub'; sub.textContent = fmtMoney(r.total); info.appendChild(title); info.appendChild(sub); row.appendChild(info); contRP.appendChild(row); }); } } var byPaciente = {}; list.forEach(function (v) { if (v.status === 'pago') { var nomeP = v.pacientes && v.pacientes.nome ? v.pacientes.nome : 'Sem paciente'; byPaciente[nomeP] = (byPaciente[nomeP] || 0) + parseFloat(v.valor); } }); var rankPaciente = Object.keys(byPaciente).map(function (k) { return { nome: k, total: byPaciente[k] }; }).sort(function (a, b) { return b.total - a.total; }).slice(0, 5); var contRPac = document.getElementById('listVendasRankingPaciente'); if (contRPac) { if (rankPaciente.length === 0) { contRPac.innerHTML = '<p class="dash-empty">Sem dados ainda.</p>'; } else { contRPac.innerHTML = ''; rankPaciente.forEach(function (r) { var row = document.createElement('div'); row.className = 'dash-row'; var info = document.createElement('div'); info.className = 'dash-row-info'; var title = document.createElement('span'); title.className = 'dash-row-title'; title.textContent = r.nome; var sub = document.createElement('span'); sub.className = 'dash-row-sub'; sub.textContent = fmtMoney(r.total); info.appendChild(title); info.appendChild(sub); row.appendChild(info); contRPac.appendChild(row); }); } } var container = document.getElementById('listVendas'); if (list.length === 0) { container.innerHTML = '<p class="dash-empty">Nenhuma venda ainda.</p>'; return; } container.innerHTML = ''; list.forEach(function (v) { var row = document.createElement('div'); row.className = 'dash-row'; var info = document.createElement('div'); info.className = 'dash-row-info'; var title = document.createElement('span'); title.className = 'dash-row-title'; var pacienteNome = v.pacientes && v.pacientes.nome ? v.pacientes.nome : 'Sem paciente'; title.textContent = v.descricao + ' - ' + fmtMoney(v.valor); var sub = document.createElement('span'); sub.className = 'dash-row-sub'; var dt = new Date(v.data_venda + 'T00:00:00'); var statusLabel = v.status === 'pago' ? 'Pago' : (v.status === 'cancelado' ? 'Cancelado' : 'Pendente'); sub.textContent = dt.toLocaleDateString('pt-BR') + ' - ' + pacienteNome + ' - ' + statusLabel; info.appendChild(title); info.appendChild(sub); var btn = document.createElement('button'); btn.className = 'dash-del-btn'; btn.textContent = 'Remover'; btn.addEventListener('click', async function () { await sbAuth.from('vendas').delete().eq('id', v.id); loadVendas(); }); row.appendChild(info); row.appendChild(btn); container.appendChild(row); }); }
@@ -198,13 +263,18 @@ var now = new Date();
 var futuros = list.filter(function (e) { return new Date(e.data_inicio) >= now && e.status !== 'bloqueado'; });
 document.getElementById('statAgendamentos').textContent = futuros.length;
 renderAgendaList(document.getElementById('listAgenda'), list);
-renderAgendaList(document.getElementById('listProximos'), futuros.slice(0, 5)); agEventosCache = list; renderAgendaCalendar();
+var limite24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+var listProx24h = list.filter(function (e) { var d = new Date(e.data_inicio); return d >= now && d < limite24h && e.status !== 'bloqueado'; });
+renderProx24h(document.getElementById('listProx24h'), listProx24h);
+agEventosCache = list; renderAgendaCalendar();
+renderInicioReports();
 }
 
 
 async function loadFinanceiro() {
 var res = await sbAuth.from('financeiro_lancamentos').select('*').eq('user_id', currentUserId).order('data_lancamento', { ascending: false });
 var list = res.data || [];
+finLancamentosCache = list;
 var entradas = 0, saidas = 0;
 list.forEach(function (l) {
 var v = parseFloat(l.valor);
@@ -235,7 +305,8 @@ if (l.tipo === 'entrada') mEntradas += v; else mSaidas += v;
 document.getElementById('statSaldo').textContent = fmtMoney(mEntradas - mSaidas);
 var elEntradasMes = document.getElementById("statEntradasMes"); if (elEntradasMes) elEntradasMes.textContent = fmtMoney(mEntradas);
 var elSaidasMes = document.getElementById("statSaidasMes"); if (elSaidasMes) elSaidasMes.textContent = fmtMoney(mSaidas);
-var chartEl = document.getElementById('chartFluxoCaixa'); if (chartEl) { var months = []; var refDate = new Date(); for (var mi = 5; mi >= 0; mi--) { var dtM = new Date(refDate.getFullYear(), refDate.getMonth() - mi, 1); months.push({ key: dtM.getFullYear() + '-' + dtM.getMonth(), label: dtM.toLocaleDateString('pt-BR', { month: 'short' }), entrada: 0, saida: 0 }); } list.forEach(function (l) { var dL = new Date(l.data_lancamento); var key = dL.getFullYear() + '-' + dL.getMonth(); var mObj = months.find(function (m) { return m.key === key; }); if (mObj) { var vL = parseFloat(l.valor); if (l.tipo === 'entrada') mObj.entrada += vL; else mObj.saida += vL; } }); var maxVal = 1; months.forEach(function (m) { if (m.entrada > maxVal) maxVal = m.entrada; if (m.saida > maxVal) maxVal = m.saida; }); chartEl.innerHTML = ''; months.forEach(function (m) { var col = document.createElement('div'); col.className = 'dash-chart-month'; var bars = document.createElement('div'); bars.className = 'dash-chart-bars'; var barE = document.createElement('div'); barE.className = 'dash-chart-bar dash-chart-bar-entrada'; barE.style.height = Math.round((m.entrada / maxVal) * 150) + 'px'; barE.title = 'Entradas: ' + fmtMoney(m.entrada); var barS = document.createElement('div'); barS.className = 'dash-chart-bar dash-chart-bar-saida'; barS.style.height = Math.round((m.saida / maxVal) * 150) + 'px'; barS.title = 'Saidas: ' + fmtMoney(m.saida); bars.appendChild(barE); bars.appendChild(barS); var lbl = document.createElement('span'); lbl.className = 'dash-chart-label'; lbl.textContent = m.label; col.appendChild(bars); col.appendChild(lbl); chartEl.appendChild(col); }); }
+renderInicioReports();
+renderFinanceiroCharts();
 
 var container = document.getElementById('listFinanceiro');
 if (list.length === 0) {
@@ -321,6 +392,8 @@ container.appendChild(row);
 });
 }
 
+var pacBuscaEl = document.getElementById('pacBusca');
+if (pacBuscaEl) pacBuscaEl.addEventListener('input', function () { renderPacientesList(); });
 document.getElementById('formPaciente').addEventListener('submit', async function (e) {
 e.preventDefault();
 var nome = document.getElementById('pacNome').value.trim();
@@ -462,6 +535,7 @@ loadComissoes();
 async function loadProfissionais() {
 var res = await sbAuth.from('profissionais').select('*').eq('user_id', currentUserId).order('nome', { ascending: true });
 var list = res.data || [];
+profissionaisCache = list;
 var selCom = document.getElementById('comProfissional'); selCom.innerHTML = '<option value="">Sem profissional</option>'; list.forEach(function (p) { var o = document.createElement('option'); o.value = p.nome; o.textContent = p.nome; selCom.appendChild(o); });
 var selAtd = document.getElementById('atdProfissional'); selAtd.innerHTML = '<option value="">Sem profissional</option>'; list.forEach(function (p) { var o2 = document.createElement('option'); o2.value = p.nome; o2.textContent = p.nome; selAtd.appendChild(o2); });
 var selAgMod = document.getElementById('agModProfissional'); if (selAgMod) { selAgMod.innerHTML = '<option value="">Sem profissional</option>'; list.forEach(function (p) { var o3 = document.createElement('option'); o3.value = p.id; o3.textContent = p.nome; selAgMod.appendChild(o3); }); }
@@ -497,6 +571,7 @@ row.appendChild(info);
 row.appendChild(btn);
 container.appendChild(row);
 });
+renderInicioReports();
 }
 
 document.getElementById('formSala').addEventListener('submit', async function (e) {
@@ -1289,3 +1364,378 @@ loadAgenda();
 }
 
 // v7-agenda-meia-hora-modal
+
+// ============================================
+// Inicio - Relatorios e Dashboard (v8)
+// ============================================
+
+function inSetText(id, txt) { var el = document.getElementById(id); if (el) el.textContent = txt; }
+
+function inInitials(nome) {
+var parts = String(nome || '').trim().split(/\s+/).filter(Boolean);
+if (parts.length === 0) return '?';
+if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function inParseFinDate(l) {
+var s = l.data_lancamento;
+if (!s) return new Date(NaN);
+return new Date(s.length === 10 ? s + 'T00:00:00' : s);
+}
+
+// Lista das proximas 24h (somente leitura) na tela de Inicio
+function renderProx24h(container, list) {
+if (!container) return;
+if (!list || list.length === 0) {
+container.innerHTML = '<p class="dash-empty">Sem agendamentos marcados para as proximas 24 horas.</p>';
+return;
+}
+container.innerHTML = '';
+list.forEach(function (ev) {
+var row = document.createElement('div');
+row.className = 'dash-row';
+var info = document.createElement('div');
+info.className = 'dash-row-info';
+var title = document.createElement('span');
+title.className = 'dash-row-title';
+title.textContent = ev.titulo;
+var sub = document.createElement('span');
+sub.className = 'dash-row-sub';
+var dt = new Date(ev.data_inicio);
+var pacienteNome = ev.pacientes && ev.pacientes.nome ? ev.pacientes.nome : null;
+var profNome = null;
+if (ev.profissional_id) { (profissionaisCache || []).forEach(function (p) { if (p.id === ev.profissional_id) profNome = p.nome; }); }
+var partes = [dt.toLocaleString('pt-BR', { weekday: 'short', hour: '2-digit', minute: '2-digit' })];
+if (pacienteNome) partes.push(pacienteNome);
+if (profNome) partes.push(profNome);
+sub.textContent = partes.join(' - ');
+info.appendChild(title);
+info.appendChild(sub);
+row.appendChild(info);
+container.appendChild(row);
+});
+}
+
+// Intervalo de datas conforme periodo/data de referencia
+function inGetRange(periodo, refDate) {
+periodo = periodo || inPeriodo;
+var ref = new Date(refDate || inRefDate);
+var start, end;
+if (periodo === 'dia') {
+start = new Date(ref); start.setHours(0, 0, 0, 0);
+end = agAddDays(start, 1);
+} else if (periodo === 'mes') {
+start = new Date(ref.getFullYear(), ref.getMonth(), 1);
+end = new Date(ref.getFullYear(), ref.getMonth() + 1, 1);
+} else if (periodo === 'ano') {
+start = new Date(ref.getFullYear(), 0, 1);
+end = new Date(ref.getFullYear() + 1, 0, 1);
+} else {
+start = agStartOfWeek(ref);
+end = agAddDays(start, 7);
+}
+return { start: start, end: end };
+}
+
+function inFmtRangeLabel(periodo, refDate) {
+periodo = periodo || inPeriodo;
+var r = inGetRange(periodo, refDate);
+if (periodo === 'dia') return r.start.toLocaleDateString('pt-BR');
+if (periodo === 'mes') { var s = r.start.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }); return s.charAt(0).toUpperCase() + s.slice(1); }
+if (periodo === 'ano') return String(r.start.getFullYear());
+var last = agAddDays(r.end, -1);
+return r.start.toLocaleDateString('pt-BR') + ' - ' + last.toLocaleDateString('pt-BR');
+}
+
+// Buckets: dia = blocos de 2h; semana/mes = dias; ano = meses
+function inGetBuckets(periodo, refDate) {
+periodo = periodo || inPeriodo;
+var r = inGetRange(periodo, refDate);
+var buckets = [];
+if (periodo === 'dia') {
+for (var h = 0; h < 24; h += 2) {
+var hs = new Date(r.start); hs.setHours(h, 0, 0, 0);
+var he = new Date(r.start); he.setHours(h + 2, 0, 0, 0);
+buckets.push({ key: 'h' + h, label: (h < 10 ? '0' + h : h) + 'h', start: hs, end: he });
+}
+} else if (periodo === 'ano') {
+for (var m = 0; m < 12; m++) {
+var ms = new Date(r.start.getFullYear(), m, 1);
+var me = new Date(r.start.getFullYear(), m + 1, 1);
+var lblM = ms.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+buckets.push({ key: 'm' + m, label: lblM, start: ms, end: me });
+}
+} else {
+var cur = new Date(r.start);
+while (cur < r.end) {
+var ds = new Date(cur); ds.setHours(0, 0, 0, 0);
+var de = agAddDays(ds, 1);
+var lblD = periodo === 'semana' ? ds.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '') : String(ds.getDate());
+buckets.push({ key: 'd' + ds.getTime(), label: lblD, start: ds, end: de });
+cur = de;
+}
+}
+return buckets;
+}
+
+// Funcao mestre: recalcula dados do periodo e dispara as sub-renderizacoes
+function renderInicioReports() {
+var lblEl = document.getElementById('inRangeLabel');
+if (!lblEl) return;
+lblEl.textContent = inFmtRangeLabel();
+document.querySelectorAll('.in-periodo-tab').forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-inperiodo') === inPeriodo); });
+
+var range = inGetRange();
+var buckets = inGetBuckets();
+buckets.forEach(function (b) { b.entradaReal = 0; b.entradaPrev = 0; b.saidaReal = 0; b.saidaPrev = 0; });
+
+var totEntR = 0, totEntP = 0, totSaiR = 0, totSaiP = 0;
+(finLancamentosCache || []).forEach(function (l) {
+var d = inParseFinDate(l);
+if (isNaN(d) || d < range.start || d >= range.end) return;
+var v = parseFloat(l.valor) || 0;
+var pendente = l.status === 'pendente';
+var b = null;
+for (var i = 0; i < buckets.length; i++) { if (d >= buckets[i].start && d < buckets[i].end) { b = buckets[i]; break; } }
+if (l.tipo === 'entrada') {
+if (pendente) { totEntP += v; if (b) b.entradaPrev += v; } else { totEntR += v; if (b) b.entradaReal += v; }
+} else {
+if (pendente) { totSaiP += v; if (b) b.saidaPrev += v; } else { totSaiR += v; if (b) b.saidaReal += v; }
+}
+});
+
+// Balanco
+var saldoReal = totEntR - totSaiR;
+var saldoPrev = (totEntR + totEntP) - (totSaiR + totSaiP);
+inSetText('inBalancoSaldo', fmtMoney(saldoReal));
+inSetText('inBalancoPrev', fmtMoney(saldoPrev));
+inSetText('inBalEntReal', fmtMoney(totEntR));
+inSetText('inBalEntPrev', 'Previsto ' + fmtMoney(totEntR + totEntP));
+inSetText('inBalSaiReal', fmtMoney(totSaiR));
+inSetText('inBalSaiPrev', 'Previsto ' + fmtMoney(totSaiR + totSaiP));
+var entPct = (totEntR + totEntP) > 0 ? Math.round(totEntR / (totEntR + totEntP) * 100) : 0;
+var saiPct = (totSaiR + totSaiP) > 0 ? Math.round(totSaiR / (totSaiR + totSaiP) * 100) : 0;
+var ebar = document.getElementById('inBalEntBar'); if (ebar) ebar.style.width = entPct + '%';
+var sbar = document.getElementById('inBalSaiBar'); if (sbar) sbar.style.width = saiPct + '%';
+
+// Agenda do periodo (exclui bloqueios)
+var eventos = (agEventosCache || []).filter(function (ev) {
+var d = new Date(ev.data_inicio);
+return d >= range.start && d < range.end && ev.status !== 'bloqueado';
+});
+
+renderFluxoCaixaChart(buckets);
+renderAgComparadosChart(buckets, eventos);
+renderStatusDonutChart(eventos);
+renderAgPorProfissionalChart(eventos);
+renderAtdFreqChart(range);
+}
+
+// Helper generico de grafico de barras (uma barra por item)
+function renderSimpleBarChart(el, items, opts) {
+if (!el) return;
+opts = opts || {};
+var hasData = items && items.some(function (it) { return it.value > 0; });
+if (!items || items.length === 0 || !hasData) { el.innerHTML = '<p class="dash-empty">' + (opts.emptyMsg || 'Sem dados no periodo.') + '</p>'; return; }
+var max = 1;
+items.forEach(function (it) { if (it.value > max) max = it.value; });
+el.innerHTML = '';
+items.forEach(function (it) {
+var col = document.createElement('div');
+col.className = 'dash-chart-month';
+var bars = document.createElement('div');
+bars.className = 'dash-chart-bars';
+var bar = document.createElement('div');
+bar.className = 'dash-chart-bar';
+bar.style.height = Math.round((it.value / max) * 150) + 'px';
+bar.style.width = '22px';
+bar.style.background = it.color || opts.color || 'var(--primary)';
+bar.title = (it.label || '') + ': ' + (opts.fmt ? opts.fmt(it.value) : it.value);
+bars.appendChild(bar);
+col.appendChild(bars);
+if (opts.avatar && it.initials) {
+var av = document.createElement('div');
+av.className = 'in-bar-avatar';
+av.textContent = it.initials;
+col.appendChild(av);
+}
+var lbl = document.createElement('span');
+lbl.className = 'dash-chart-label';
+lbl.textContent = it.label || '';
+col.appendChild(lbl);
+if (opts.showValue) {
+var val = document.createElement('span');
+val.className = 'in-bar-value';
+val.textContent = opts.valueLabel ? opts.valueLabel(it.value) : String(it.value);
+col.appendChild(val);
+}
+el.appendChild(col);
+});
+}
+
+// Fluxo de caixa: barras (entradas/saidas realizadas e previstas) + linha SVG de saldo
+function renderFluxoCaixaChart(buckets, elId, legendId) {
+var el = document.getElementById(elId || 'chartFluxoCaixa');
+if (!el) return;
+var legEl = document.getElementById(legendId || 'inFluxoLegend');
+if (legEl) {
+var legItems = [['#12b76a', 'Entradas'], ['#a6e9c5', 'Entradas previstas'], ['#f04438', 'Saidas'], ['#fca5a0', 'Saidas previstas']];
+legEl.innerHTML = legItems.map(function (x) { return '<span class="in-leg-item"><span class="in-leg-box" style="background:' + x[0] + '"></span>' + x[1] + '</span>'; }).join('')
++ '<span class="in-leg-item"><span class="in-leg-line"></span>Saldo</span>'
++ '<span class="in-leg-item"><span class="in-leg-line dashed"></span>Saldo previsto</span>';
+}
+var maxBar = 1;
+buckets.forEach(function (b) { maxBar = Math.max(maxBar, b.entradaReal, b.entradaPrev, b.saidaReal, b.saidaPrev); });
+var saldoR = buckets.map(function (b) { return b.entradaReal - b.saidaReal; });
+var saldoP = buckets.map(function (b) { return (b.entradaReal + b.entradaPrev) - (b.saidaReal + b.saidaPrev); });
+var allS = saldoR.concat(saldoP).concat([0]);
+var maxS = Math.max.apply(null, allS), minS = Math.min.apply(null, allS);
+if (maxS === minS) { maxS += 1; minS -= 1; }
+var n = buckets.length || 1;
+function sy(v) { return (100 - ((v - minS) / (maxS - minS)) * 100); }
+function bar(h, c, t) { return '<div class="dash-chart-bar" title="' + t + '" style="height:' + Math.round((h / maxBar) * 150) + 'px;background:' + c + '"></div>'; }
+var barsHtml = buckets.map(function (b) {
+return '<div class="dash-chart-month"><div class="dash-chart-bars">'
++ bar(b.entradaReal, '#12b76a', b.label + ' - Entradas: ' + fmtMoney(b.entradaReal))
++ bar(b.entradaPrev, '#a6e9c5', b.label + ' - Entradas previstas: ' + fmtMoney(b.entradaPrev))
++ bar(b.saidaReal, '#f04438', b.label + ' - Saidas: ' + fmtMoney(b.saidaReal))
++ bar(b.saidaPrev, '#fca5a0', b.label + ' - Saidas previstas: ' + fmtMoney(b.saidaPrev))
++ '</div><span class="dash-chart-label">' + b.label + '</span></div>';
+}).join('');
+var ptsR = saldoR.map(function (v, i) { return (i + 0.5) + ',' + sy(v).toFixed(2); }).join(' ');
+var ptsP = saldoP.map(function (v, i) { return (i + 0.5) + ',' + sy(v).toFixed(2); }).join(' ');
+var svg = '<svg class="in-fluxo-svg" viewBox="0 0 ' + n + ' 100" preserveAspectRatio="none">'
++ '<polyline class="in-fluxo-pl prev" points="' + ptsP + '"></polyline>'
++ '<polyline class="in-fluxo-pl real" points="' + ptsR + '"></polyline></svg>';
+el.innerHTML = '<div class="in-fluxo-plot"><div class="in-fluxo-bars">' + barsHtml + '</div>' + svg + '</div>';
+}
+
+// Agendamentos comparados: quantidade de agendamentos por bucket do periodo
+function renderAgComparadosChart(buckets, eventos) {
+var el = document.getElementById('chartAgComparados');
+var counts = buckets.map(function () { return 0; });
+eventos.forEach(function (ev) {
+var d = new Date(ev.data_inicio);
+for (var i = 0; i < buckets.length; i++) { if (d >= buckets[i].start && d < buckets[i].end) { counts[i]++; break; } }
+});
+var items = buckets.map(function (b, i) { return { label: b.label, value: counts[i] }; });
+renderSimpleBarChart(el, items, { showValue: true, emptyMsg: 'Nenhum agendamento no periodo.' });
+}
+
+// Atendimentos mais frequentes: top procedimentos no periodo
+function renderAtdFreqChart(range) {
+var el = document.getElementById('chartAtdFreq');
+var by = {};
+(atendimentosCache || []).forEach(function (a) {
+var d = new Date(a.data_atendimento);
+if (isNaN(d) || d < range.start || d >= range.end) return;
+var k = a.procedimento || 'Outro';
+by[k] = (by[k] || 0) + 1;
+});
+var items = Object.keys(by).map(function (k) { return { label: k, value: by[k] }; }).sort(function (a, b) { return b.value - a.value; }).slice(0, 8);
+renderSimpleBarChart(el, items, { showValue: true, emptyMsg: 'Nenhum atendimento no periodo.' });
+}
+
+// Agendamentos por profissional
+function renderAgPorProfissionalChart(eventos) {
+var el = document.getElementById('chartAgProf');
+var byId = {};
+eventos.forEach(function (ev) { var k = ev.profissional_id || 'sem'; byId[k] = (byId[k] || 0) + 1; });
+var nameOf = {};
+(profissionaisCache || []).forEach(function (p) { nameOf[p.id] = p.nome; });
+var items = Object.keys(byId).map(function (k) {
+var nome = k === 'sem' ? 'Sem prof.' : (nameOf[k] || 'Profissional');
+return { label: nome, value: byId[k], initials: inInitials(nome) };
+}).sort(function (a, b) { return b.value - a.value; });
+renderSimpleBarChart(el, items, { avatar: true, showValue: true, emptyMsg: 'Nenhum agendamento no periodo.' });
+}
+
+// Status por agendamento (grafico de rosca/donut)
+function renderStatusDonutChart(eventos) {
+var el = document.getElementById('chartStatusDonut');
+if (!el) return;
+var labels = { agendado: 'Agendado', confirmado: 'Confirmado', concluido: 'Concluido', cancelado: 'Cancelado', faltou: 'Faltou' };
+var colors = { agendado: '#667085', confirmado: '#17A398', concluido: '#12b76a', cancelado: '#f04438', faltou: '#f79009' };
+var counts = {}, total = 0;
+eventos.forEach(function (ev) { var s = ev.status || 'agendado'; counts[s] = (counts[s] || 0) + 1; total++; });
+if (total === 0) { el.innerHTML = '<p class="dash-empty">Nenhum agendamento no periodo.</p>'; return; }
+var order = Object.keys(labels).filter(function (k) { return counts[k]; });
+var C = 2 * Math.PI * 45, offset = 0, segs = '';
+order.forEach(function (k) {
+var len = (counts[k] / total) * C;
+segs += '<circle cx="60" cy="60" r="45" fill="none" stroke="' + colors[k] + '" stroke-width="18" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) + '" stroke-dashoffset="' + (-offset).toFixed(2) + '" transform="rotate(-90 60 60)"></circle>';
+offset += len;
+});
+var legend = order.map(function (k) { var pct = Math.round(counts[k] / total * 100); return '<div class="in-donut-leg"><span class="in-donut-dot" style="background:' + colors[k] + '"></span>' + labels[k] + ' <strong>' + counts[k] + '</strong> <span class="in-donut-pct">(' + pct + '%)</span></div>'; }).join('');
+el.innerHTML = '<div class="in-donut-svgwrap"><svg viewBox="0 0 120 120" class="in-donut-svg">' + segs
++ '<text x="60" y="62" class="in-donut-total">' + total + '</text><text x="60" y="78" class="in-donut-sub">agend.</text></svg></div>'
++ '<div class="in-donut-legend">' + legend + '</div>';
+}
+
+// ===== Inicio - interacoes (periodo e navegacao de intervalo) =====
+document.querySelectorAll('.in-periodo-tab').forEach(function (t) {
+t.addEventListener('click', function () {
+inPeriodo = t.getAttribute('data-inperiodo');
+renderInicioReports();
+});
+});
+
+function inShift(delta) {
+if (inPeriodo === 'dia') inRefDate = agAddDays(inRefDate, delta);
+else if (inPeriodo === 'semana') inRefDate = agAddDays(inRefDate, delta * 7);
+else if (inPeriodo === 'mes') inRefDate = new Date(inRefDate.getFullYear(), inRefDate.getMonth() + delta, 1);
+else inRefDate = new Date(inRefDate.getFullYear() + delta, 0, 1);
+renderInicioReports();
+}
+
+var inPrevBtn = document.getElementById('inPrev');
+if (inPrevBtn) inPrevBtn.addEventListener('click', function () { inShift(-1); });
+var inNextBtn = document.getElementById('inNext');
+if (inNextBtn) inNextBtn.addEventListener('click', function () { inShift(1); });
+var inHojeBtn = document.getElementById('inHoje');
+if (inHojeBtn) inHojeBtn.addEventListener('click', function () { inRefDate = new Date(); renderInicioReports(); });
+
+// ============================================
+// Financeiro - graficos reativos ao periodo (v9)
+// ============================================
+function renderFinanceiroCharts() {
+var lbl = document.getElementById('finRangeLabel');
+if (!lbl) return;
+lbl.textContent = inFmtRangeLabel(finPeriodo, finRefDate);
+document.querySelectorAll('.fin-periodo-tab').forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-finperiodo') === finPeriodo); });
+var range = inGetRange(finPeriodo, finRefDate);
+var buckets = inGetBuckets(finPeriodo, finRefDate);
+buckets.forEach(function (b) { b.entradaReal = 0; b.entradaPrev = 0; b.saidaReal = 0; b.saidaPrev = 0; });
+(finLancamentosCache || []).forEach(function (l) {
+var d = inParseFinDate(l);
+if (isNaN(d) || d < range.start || d >= range.end) return;
+var v = parseFloat(l.valor) || 0;
+var pend = l.status === 'pendente';
+var b = null;
+for (var i = 0; i < buckets.length; i++) { if (d >= buckets[i].start && d < buckets[i].end) { b = buckets[i]; break; } }
+if (l.tipo === 'entrada') { if (pend) { if (b) b.entradaPrev += v; } else { if (b) b.entradaReal += v; } }
+else { if (pend) { if (b) b.saidaPrev += v; } else { if (b) b.saidaReal += v; } }
+});
+renderFluxoCaixaChart(buckets, 'finChartFluxo', 'finFluxoLegend');
+var fat = buckets.map(function (b) { return { label: b.label, value: b.entradaReal, color: '#12b76a' }; });
+renderSimpleBarChart(document.getElementById('finChartFaturamento'), fat, { fmt: fmtMoney, emptyMsg: 'Sem faturamento no periodo.' });
+}
+
+function finShift(delta) {
+if (finPeriodo === 'dia') finRefDate = agAddDays(finRefDate, delta);
+else if (finPeriodo === 'semana') finRefDate = agAddDays(finRefDate, delta * 7);
+else if (finPeriodo === 'mes') finRefDate = new Date(finRefDate.getFullYear(), finRefDate.getMonth() + delta, 1);
+else finRefDate = new Date(finRefDate.getFullYear() + delta, 0, 1);
+renderFinanceiroCharts();
+}
+
+document.querySelectorAll('.fin-periodo-tab').forEach(function (t) {
+t.addEventListener('click', function () { finPeriodo = t.getAttribute('data-finperiodo'); renderFinanceiroCharts(); });
+});
+var finPrevBtn = document.getElementById('finPrev');
+if (finPrevBtn) finPrevBtn.addEventListener('click', function () { finShift(-1); });
+var finNextBtn = document.getElementById('finNext');
+if (finNextBtn) finNextBtn.addEventListener('click', function () { finShift(1); });
+var finHojeBtn = document.getElementById('finHoje');
+if (finHojeBtn) finHojeBtn.addEventListener('click', function () { finRefDate = new Date(); renderFinanceiroCharts(); });
